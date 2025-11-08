@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F7F8FA"
+    android:padding="20dp">
+
+    <!-- 상단 타이틀 영역 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="16dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/left_arrow"
+            android:contentDescription="Back" />
+
+        <TextView
+            android:id="@+id/txtTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MAIL 변경"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginStart="12dp" />
+    </LinearLayout>
+
+
+    <!-- 안내 텍스트 -->
+    <TextView
+        android:id="@+id/txtDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="현재 mail주소"
+        android:textSize="15sp"
+        android:textColor="#555555"
+        android:layout_marginTop="30dp" />
+
+
+    <!-- 이름 입력창 -->
+    <EditText
+        android:id="@+id/editNewName"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:hint="새 mail 입력"
+        android:padding="12dp"
+        android:textSize="16sp"
+        android:layout_marginTop="16dp" />
+
+
+    <!-- 저장 버튼 -->
+    <Button
+        android:id="@+id/btnSaveName"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="저장"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#FFFFFF"
+        android:layout_marginTop="30dp" />
+
+</LinearLayout>
