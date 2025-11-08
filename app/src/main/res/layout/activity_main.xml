@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="#F0F2FC">
+
+    <!-- 검색 아이콘 -->
+
+    <!-- 분실물 찾기 텍스트 -->
+    <ImageView
+        android:id="@+id/searchIcon"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:layout_marginBottom="0dp"
+        android:maxWidth="120dp"
+        android:maxHeight="120dp"
+        android:src="@drawable/login_icon" />
+
+    <TextView
+        android:id="@+id/titleText"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="분실물 찾기"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        />
+
+    <!-- 로그인 버튼 -->
+    <Button
+        android:id="@+id/loginButton"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:backgroundTint="#000000"
+        android:text="로 그 인"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        app:cornerRadius="10dp"/>
+
+    <!-- 회원가입 버튼 -->
+    <Button
+        android:id="@+id/signupButton"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="#FFFFFF"
+        android:text="회 원 가 입"
+        android:textColor="@android:color/black"
+        android:textSize="18sp"
+        app:cornerRadius="10dp"/>
+
+</LinearLayout>
