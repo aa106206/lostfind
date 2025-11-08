@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.disgusting"
+    namespace = "com.example.lostfind"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.disgusting"
+        applicationId = "com.example.lostfind"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
