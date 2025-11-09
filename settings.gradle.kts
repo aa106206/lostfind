@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "disgusting"
+rootProject.name = "lostfind"
 include(":app")
