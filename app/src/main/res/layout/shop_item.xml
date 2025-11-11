@@ -15,7 +15,7 @@
         android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher_foreground"
         android:layout_marginEnd="12dp"
-        android:contentDescription="@string/app_name" />
+        android:contentDescription="상품사진" />
 
     <!-- 텍스트 영역 -->
     <LinearLayout
