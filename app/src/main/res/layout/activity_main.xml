@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#F0F2FC">
+    android:background="@color/white">
 
     <!-- 검색 아이콘 -->
 
@@ -48,7 +48,7 @@
         android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:backgroundTint="#FFFFFF"
+        android:backgroundTint="@color/silver"
         android:text="회 원 가 입"
         android:textColor="@android:color/black"
         android:textSize="18sp"
