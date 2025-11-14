@@ -5,7 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5">
+    android:background="#F5F5F5"
+    android:id="@+id/main">
+
     <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/toolbar"
     android:layout_width="0dp"
@@ -19,7 +21,6 @@
         android:id="@+id/btn_back"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        android:padding="16dp"
         android:scaleType="centerCrop"
         android:src="@drawable/left_arrow"
         android:contentDescription="뒤로 가기"

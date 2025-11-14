@@ -70,6 +70,7 @@
 
 
         <Button
+            android:id="@+id/name_change_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
@@ -81,6 +82,7 @@
             android:backgroundTint="@color/gray"/>
 
         <Button
+            android:id="@+id/email_change_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
@@ -92,6 +94,7 @@
             android:backgroundTint="@color/gray"/>
 
         <Button
+            android:id="@+id/id_change_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
@@ -103,6 +106,7 @@
             android:backgroundTint="@color/gray"/>
 
         <Button
+            android:id="@+id/pw_change_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginRight="15dp"
@@ -114,6 +118,7 @@
             android:backgroundTint="@color/gray"/>
 
         <Button
+            android:id="@+id/bookmark_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
@@ -125,6 +130,7 @@
             android:backgroundTint="@color/gray"/>
 
         <Button
+            android:id="@+id/pointshop_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"

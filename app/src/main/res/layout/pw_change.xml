@@ -5,7 +5,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="#F7F8FA"
-    android:padding="20dp">
+    android:padding="20dp"
+    android:id="@+id/main">
 
     <!-- 상단 타이틀 영역 -->
     <LinearLayout
@@ -15,10 +16,11 @@
         android:gravity="center_vertical"
         android:paddingBottom="16dp">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/left_arrow"
             android:contentDescription="Back" />
 
@@ -63,6 +65,7 @@
 
     <!-- 저장 버튼 -->
     <Button
+        android:id="@+id/btnSaveName"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:text="저장"
