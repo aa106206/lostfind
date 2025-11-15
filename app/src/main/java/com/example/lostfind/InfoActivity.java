@@ -60,12 +60,12 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
-//        binding.bookmarkButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(InfoActivity.this, BookMarkActivity.class));
-//            }
-//        });
+        binding.bookmarkButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(InfoActivity.this, BookmarkActivity.class));
+            }
+        });
 
         binding.pointshopButton.setOnClickListener(new View.OnClickListener() {
             @Override

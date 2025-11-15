@@ -13,20 +13,20 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.lostfind.databinding.PointshopBinding;
-import com.example.lostfind.databinding.ShopItemBinding;
+import com.example.lostfind.databinding.ItemBookmarkBinding;
+import com.example.lostfind.databinding.ListChatBinding;
+import com.example.lostfind.databinding.ItemChatBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PointShopActivity extends AppCompatActivity {
+public class ChatListActivity extends AppCompatActivity {
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        PointshopBinding binding = PointshopBinding.inflate(getLayoutInflater());
+        ListChatBinding binding = ListChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -42,57 +42,51 @@ public class PointShopActivity extends AppCompatActivity {
             }
         });
 
-        List<String> namelist = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i  < 20; i++) {
-            namelist.add("상품 : " + i);
+            list.add("채팅 : " + i);
         }
 
-//        List<String> infolist = new ArrayList<>();
-//        for (int i = 0; i  < 20; i++) {
-//            namelist.add(i + "번 상품 설명");
-//        }
-
-        binding.productsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.productsRecyclerView.setAdapter(new MyAdapter(namelist));
-
+        binding.recyclerChat.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerChat.setAdapter(new ChatListActivity.MyAdapter(list));
     }
 
     private class MyViewHolder extends RecyclerView.ViewHolder {
-        private ShopItemBinding itemBinding;
+        private ItemChatBinding itemBinding;
 
-        public MyViewHolder(ShopItemBinding itemBinding) {
+        public MyViewHolder(ItemChatBinding itemBinding) {
             super(itemBinding.getRoot());
             this.itemBinding = itemBinding;
         }
 
         private void bind(String text) {
-            itemBinding.itemTitle.setText(text);
+            itemBinding.tvSenderName.setText(text);
         }
     }
 
-    private class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
-        private List<String> namelist;
+    private class MyAdapter extends RecyclerView.Adapter<ChatListActivity.MyViewHolder> {
+        private List<String> list;
 
         private MyAdapter(List<String> list) {
-            this.namelist = list;
+            this.list = list;
         }
 
         @NonNull
         @Override
-        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ShopItemBinding itemBinding = ShopItemBinding.inflate(getLayoutInflater());
-            return new MyViewHolder(itemBinding);
+        public ChatListActivity.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemChatBinding itemBinding = ItemChatBinding.inflate(getLayoutInflater());
+            return new ChatListActivity.MyViewHolder(itemBinding);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            String text = namelist.get(position);
+        public void onBindViewHolder(@NonNull ChatListActivity.MyViewHolder holder, int position) {
+            String text = list.get(position);
             holder.bind(text);
         }
 
         @Override
         public int getItemCount() {
-            return namelist.size();
+            return list.size();
         }
     }
 }

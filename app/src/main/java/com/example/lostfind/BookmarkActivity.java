@@ -13,20 +13,20 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.lostfind.databinding.PointshopBinding;
-import com.example.lostfind.databinding.ShopItemBinding;
+import com.example.lostfind.databinding.ListBookmarkBinding;
+import com.example.lostfind.databinding.ItemBookmarkBinding;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PointShopActivity extends AppCompatActivity {
+public class BookmarkActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
 
-        PointshopBinding binding = PointshopBinding.inflate(getLayoutInflater());
+        ListBookmarkBinding binding = ListBookmarkBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -42,35 +42,29 @@ public class PointShopActivity extends AppCompatActivity {
             }
         });
 
-        List<String> namelist = new ArrayList<>();
+        List<String> list = new ArrayList<>();
         for (int i = 0; i  < 20; i++) {
-            namelist.add("상품 : " + i);
+            list.add("게시글 제목 : " + i);
         }
 
-//        List<String> infolist = new ArrayList<>();
-//        for (int i = 0; i  < 20; i++) {
-//            namelist.add(i + "번 상품 설명");
-//        }
-
-        binding.productsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        binding.productsRecyclerView.setAdapter(new MyAdapter(namelist));
-
+        binding.recyclerBookmark.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerBookmark.setAdapter(new BookmarkActivity.MyAdapter(list));
     }
 
     private class MyViewHolder extends RecyclerView.ViewHolder {
-        private ShopItemBinding itemBinding;
+        private ItemBookmarkBinding itemBinding;
 
-        public MyViewHolder(ShopItemBinding itemBinding) {
+        public MyViewHolder(ItemBookmarkBinding itemBinding) {
             super(itemBinding.getRoot());
             this.itemBinding = itemBinding;
         }
 
         private void bind(String text) {
-            itemBinding.itemTitle.setText(text);
+            itemBinding.tvPostTitle.setText(text);
         }
     }
 
-    private class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
+    private class MyAdapter extends RecyclerView.Adapter<BookmarkActivity.MyViewHolder> {
         private List<String> namelist;
 
         private MyAdapter(List<String> list) {
@@ -79,13 +73,13 @@ public class PointShopActivity extends AppCompatActivity {
 
         @NonNull
         @Override
-        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            ShopItemBinding itemBinding = ShopItemBinding.inflate(getLayoutInflater());
-            return new MyViewHolder(itemBinding);
+        public BookmarkActivity.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            ItemBookmarkBinding itemBinding = ItemBookmarkBinding.inflate(getLayoutInflater());
+            return new BookmarkActivity.MyViewHolder(itemBinding);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        public void onBindViewHolder(@NonNull BookmarkActivity.MyViewHolder holder, int position) {
             String text = namelist.get(position);
             holder.bind(text);
         }
@@ -95,4 +89,5 @@ public class PointShopActivity extends AppCompatActivity {
             return namelist.size();
         }
     }
+
 }
