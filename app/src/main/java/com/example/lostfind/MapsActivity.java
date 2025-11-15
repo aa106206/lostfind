@@ -27,8 +27,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
 
         ActivityMapsBinding mapBinding = ActivityMapsBinding.inflate(getLayoutInflater());
-        setContentView(mapBinding.getRoot());
-
         NavigationBinding naviBinding = NavigationBinding.inflate(getLayoutInflater());
         setContentView(mapBinding.getRoot());
 
@@ -44,6 +42,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         naviBinding.goMyinfo.setOnClickListener(v -> {
             Intent intent = new Intent(this, InfoActivity.class);
+            startActivity(intent);
+        });
+
+        naviBinding.goStart.setOnClickListener(v -> {
+            Intent intent = new Intent(MapsActivity.this, StartActivity.class);
             startActivity(intent);
         });
 
