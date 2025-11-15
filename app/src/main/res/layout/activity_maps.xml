@@ -14,7 +14,8 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity">
+    tools:context=".MapsActivity"
+    >
 
     <FrameLayout
         android:id="@+id/map_container"
@@ -27,9 +28,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
-        <!-- ☰ 햄버거 버튼 -->
+
         <ImageButton
-            android:id="@+id/btn_menu"
+            android:id="@+id/naviBtn"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_margin="20dp"
@@ -37,11 +38,14 @@
             android:background="@drawable/hamburger_icon" />
     </FrameLayout>
 
-    <com.google.android.material.navigation.NavigationView
+
+<!--    incluce 태그는 나도 잘 몰라서 gpt 참고 많이함-->
+    <include
         android:id="@+id/nav_view"
-        android:layout_width="250dp"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="end"
-        android:background="@android:color/white" />
+        android:background="@android:color/white"
+        layout="@layout/navigation"/>
 
 </androidx.drawerlayout.widget.DrawerLayout>
