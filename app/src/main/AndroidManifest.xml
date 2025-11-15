@@ -99,6 +99,13 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".MyPostsActivity"
+            android:exported="true" />
+        <activity
+            android:name=".PostListActivity"
+            android:exported="true" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

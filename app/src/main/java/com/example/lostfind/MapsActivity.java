@@ -1,9 +1,14 @@
 package com.example.lostfind;
 
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
 
+import com.example.lostfind.databinding.NavigationBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -21,8 +26,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+        ActivityMapsBinding mapBinding = ActivityMapsBinding.inflate(getLayoutInflater());
+        setContentView(mapBinding.getRoot());
+
+        NavigationBinding naviBinding = NavigationBinding.inflate(getLayoutInflater());
+        setContentView(mapBinding.getRoot());
+
+        DrawerLayout drawerLayout = mapBinding.drawerLayout;
+        mapBinding.naviBtn.setOnClickListener(v -> {
+            drawerLayout.openDrawer(GravityCompat.END); // 네이게이션(오른쪽으로 드로어 열기)
+        });
+
+        naviBinding.goPostlist.setOnClickListener(v -> {
+            Intent intent = new Intent(this, PostListActivity.class);
+            startActivity(intent);
+        });
+
+        naviBinding.goMyinfo.setOnClickListener(v -> {
+            Intent intent = new Intent(this, InfoActivity.class);
+            startActivity(intent);
+        });
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
