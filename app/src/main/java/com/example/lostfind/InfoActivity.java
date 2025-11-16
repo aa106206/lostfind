@@ -9,14 +9,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.lostfind.databinding.MyinfoBinding;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class InfoActivity extends AppCompatActivity {
+
+    private ActivityResultLauncher<Intent> activityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +34,30 @@ public class InfoActivity extends AppCompatActivity {
             return insets;
         });
 
-        binding.nameChangeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(InfoActivity.this, UserNameActivity.class));
-            }
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    // 결과가 OK이고, 데이터가 null이 아닌지 확인
+                    if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+
+                        // --- UserNameActivity에서 온 결과 처리 ---
+                        // "newName" 키가 있는지 확인
+                        if (result.getData().hasExtra("newName")) {
+                            // Intent에서 "newName" 값을 꺼냄
+                            String updatedName = result.getData().getStringExtra("newName");
+                            // InfoActivity의 userName TextView를 업데이트
+                            binding.userName.setText(updatedName);
+                        }
+
+                    }
+                });
+
+        binding.nameChangeButton.setOnClickListener(v -> {
+            Intent intent = new Intent(InfoActivity.this, UserNameActivity.class);
+            // 현재 화면에 표시된 이름을 Intent에 "currentName"이라는 키로 담아서 전달
+            String currentName = binding.userName.getText().toString();
+            intent.putExtra("currentName", currentName);
+            activityResultLauncher.launch(intent);
         });
 
         binding.emailChangeButton.setOnClickListener(new View.OnClickListener() {

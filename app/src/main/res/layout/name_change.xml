@@ -37,7 +37,7 @@
 
     <!-- 안내 텍스트 -->
     <TextView
-        android:id="@+id/txtDescription"
+        android:id="@+id/name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="현재 이름"
