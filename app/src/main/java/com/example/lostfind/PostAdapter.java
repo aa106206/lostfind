@@ -55,8 +55,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, PostDetailActivity.class);
 
-            intent.putExtra("POST_ID", post.getPostId()); // post.getId() -> post.getPostId()로 변경
-
+            intent.putExtra("POST_ID", post.getPostId());
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         });
     }
