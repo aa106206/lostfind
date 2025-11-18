@@ -28,10 +28,10 @@ public class SignupActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         binding.signupButton.setOnClickListener(v -> signup());
 
-//        binding.signupButton.setOnClickListener(v -> {
-//            Intent intent=new Intent(this,StartActivity.class);
-//            startActivity(intent);
-//        });
+        binding.backButton.setOnClickListener(v -> {
+            Intent intent=new Intent(this,StartActivity.class);
+            startActivity(intent);
+        });
     }
 
 

@@ -20,15 +20,15 @@ import com.example.lostfind.databinding.ActivityMapsBinding;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private ActivityMapsBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         ActivityMapsBinding mapBinding = ActivityMapsBinding.inflate(getLayoutInflater());
-        NavigationBinding naviBinding = NavigationBinding.inflate(getLayoutInflater());
         setContentView(mapBinding.getRoot());
+
+        NavigationBinding naviBinding = NavigationBinding.bind(findViewById(R.id.nav_view));
 
         DrawerLayout drawerLayout = mapBinding.drawerLayout;
         mapBinding.naviBtn.setOnClickListener(v -> {
@@ -37,6 +37,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         naviBinding.goPostlist.setOnClickListener(v -> {
             Intent intent = new Intent(this, PostListActivity.class);
+            startActivity(intent);
+        });
+
+        naviBinding.goChat.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChatListActivity.class);
+            startActivity(intent);
+        });
+
+        naviBinding.goChat.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ChatListActivity.class);
+            startActivity(intent);
+        });
+
+        naviBinding.goMypost.setOnClickListener(v -> {
+            Intent intent = new Intent(this, MyPostsActivity.class);
             startActivity(intent);
         });
 
