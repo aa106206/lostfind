@@ -13,15 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lostfind">
         <activity
-            android:name=".ChatActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
             android:name=".ChatListActivity"
             android:exported="true">
             <intent-filter>
@@ -53,7 +44,6 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -113,6 +103,11 @@
         <activity
             android:name=".PostListActivity"
             android:exported="true" />
+        <activity android:name=".PostWriteActivity"
+            android:exported="true" />
+        <activity android:name=".ChatActivity"
+            android:exported="true" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

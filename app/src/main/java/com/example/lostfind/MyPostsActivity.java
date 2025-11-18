@@ -36,8 +36,8 @@ public class MyPostsActivity extends AppCompatActivity {
     }
 
     private void loadMyPosts() {
-        postList.add(new Post("분실물 찾음", "학생회관", "2024-11-13", "https://picsum.photos/seed/1/200/200"));
-        postList.add(new Post("분실물 찾음", "중앙도서관", "2024-11-12", "https://picsum.photos/seed/2/200/200"));
-        postList.add(new Post("분실물 찾음", "정보섬", "2024-11-11", "https://picsum.photos/seed/3/200/200"));
+        //postList.add(new Post("분실물 찾음", "학생회관", "2024-11-13", "https://picsum.photos/seed/1/200/200"));
+        //postList.add(new Post("분실물 찾음", "중앙도서관", "2024-11-12", "https://picsum.photos/seed/2/200/200"));
+        //postList.add(new Post("분실물 찾음", "정보섬", "2024-11-11", "https://picsum.photos/seed/3/200/200"));
     }
 }

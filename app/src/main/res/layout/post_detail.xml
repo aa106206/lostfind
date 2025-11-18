@@ -7,19 +7,39 @@
     android:background="#F5F5F5"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_post_detail"
+    <LinearLayout
+        android:id="@+id/top_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:title="게시물" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingEnd="16dp">
+
+        <Button
+            android:id="@+id/back_button"
+            android:layout_width="67dp"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_arrow_back"/>
+
+        <TextView
+            android:id="@+id/toolbar_title_text"
+            android:layout_width="279dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="게시물"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom_bar"
-        android:layout_below="@id/toolbar_post_detail">
+        android:layout_below="@id/top_bar_layout">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -75,7 +95,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
                         android:text="게시물 제목"
-                        android:textSize="18sp"
+                        android:textSize="24sp"
                         android:textStyle="bold" />
 
                     <LinearLayout
@@ -109,15 +129,18 @@
                             android:orientation="vertical">
 
                             <TextView
+                                android:id="@+id/location_text_view"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="위치" />
+                                android:text="위치"
+                                android:visibility="gone"/>
 
                             <TextView
                                 android:id="@+id/lost_item_location"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="숭실대학교" />
+                                android:text="숭실대학교"
+                                android:visibility="gone"/>
                         </LinearLayout>
                     </LinearLayout>
 
@@ -136,10 +159,12 @@
                         android:background="@drawable/button_background"/>
 
                     <TextView
+                        android:id="@+id/map_location_text_view"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="위치" />
+                        android:text="위치"
+                        android:visibility="gone"/>
 
                     <FrameLayout
                         android:id="@+id/map_container"
@@ -147,7 +172,8 @@
                         android:layout_height="150dp"
                         android:layout_marginTop="8dp"
                         android:background="@android:color/darker_gray"
-                        android:contentDescription="지도 위치" />
+                        android:contentDescription="지도 위치"
+                        android:visibility="gone"/>
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -174,6 +200,27 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <Button
+            android:id="@+id/edit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_edit"
+            android:textColor="@color/black"
+            android:text="수정"
+            android:gravity="center_vertical"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:drawableLeft="@drawable/ic_delete"
+            android:textColor="@color/black"
+            android:text="삭제"
+            android:gravity="center_vertical"
+            android:visibility="gone"/>
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
@@ -185,7 +232,8 @@
             android:layout_height="wrap_content"
             android:text="쪽지 보내기"
             android:textColor="#000000"
-            android:background="@drawable/button_background"/>
+            android:background="@drawable/button_background"
+            android:visibility="gone"/>
     </LinearLayout>
 
 </RelativeLayout>

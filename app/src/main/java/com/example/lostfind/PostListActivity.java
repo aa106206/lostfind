@@ -1,5 +1,6 @@
 package com.example.lostfind;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class PostListActivity extends AppCompatActivity {
 
-    private PostAdapter adapter;
+    private com.example.lostfind.PostAdapter adapter;
     private List<Post> postList;
 
     @Override
@@ -39,7 +40,7 @@ public class PostListActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         postList = new ArrayList<>();
-        adapter = new PostAdapter(this, postList);
+        adapter = new com.example.lostfind.PostAdapter(this, postList);
         recyclerView.setAdapter(adapter);
 
         loadPostData();
@@ -47,9 +48,9 @@ public class PostListActivity extends AppCompatActivity {
 
     private void loadPostData() {
 
-        postList.add(new Post("분실물 찾음", "학생회관", "2024-11-13", "https://picsum.photos/seed/1/200/200"));
-        postList.add(new Post("분실물 찾음", "중앙도서관", "2024-11-12", "https://picsum.photos/seed/2/200/200"));
-        postList.add(new Post("분실물 찾음", "정보섬", "2024-11-11", "https://picsum.photos/seed/3/200/200"));
+        //postList.add(new Post("분실물 찾음", "학생회관", "2024-11-13", "https://picsum.photos/seed/1/200/200"));
+        //postList.add(new Post("분실물 찾음", "중앙도서관", "2024-11-12", "https://picsum.photos/seed/2/200/200"));
+        //postList.add(new Post("분실물 찾음", "정보섬", "2024-11-11", "https://picsum.photos/seed/3/200/200"));
 
     }
 }
