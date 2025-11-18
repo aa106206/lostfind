@@ -60,6 +60,13 @@ public class InfoActivity extends AppCompatActivity {
             activityResultLauncher.launch(intent);
         });
 
+        binding.imageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
         binding.emailChangeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
