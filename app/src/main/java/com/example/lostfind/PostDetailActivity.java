@@ -8,6 +8,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.HashMap;
+import java.util.Map;
+
 // NonNull 어노테이션을 위해 추가
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -79,6 +82,7 @@ public class PostDetailActivity extends AppCompatActivity {
         editButton = findViewById(R.id.edit_button);
         deleteButton = findViewById(R.id.delete_button);
         sendMessageButton = findViewById(R.id.send_message_button);
+        sendMessageButton.setOnClickListener(v -> startChat());
     }
 
     private void loadPostData() {
@@ -150,4 +154,95 @@ public class PostDetailActivity extends AppCompatActivity {
             sendMessageButton.setVisibility(View.VISIBLE);
         }
     }
+
+    private void startChat() {
+        // 상대방(게시글 작성자)의 정보를 가져옵니다.
+        databaseReference.child(postId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot postSnapshot) {
+                if (!postSnapshot.exists()) {
+                    Toast.makeText(PostDetailActivity.this, "게시물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Post post = postSnapshot.getValue(Post.class);
+                if (post == null) return;
+
+                String opponentUid = post.getAuthorId();
+                String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                if (opponentUid == null || opponentUid.equals(myUid)) {
+                    Toast.makeText(PostDetailActivity.this, "자기 자신과는 채팅할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // 상대방의 이름을 가져오기 위해 'users' DB를 조회합니다.
+                DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+                usersRef.child(opponentUid).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot nameSnapshot) {
+                        String opponentName = nameSnapshot.getValue(String.class);
+                        if (opponentName == null) {
+                            opponentName = "상대방"; // 이름 정보가 없을 경우 기본값
+                        }
+
+                        // 채팅방 ID 생성 및 채팅방으로 이동
+                        createOrGoToChatRoom(myUid, opponentUid, opponentName);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        Toast.makeText(PostDetailActivity.this, "상대방 정보를 불러오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(PostDetailActivity.this, "데이터 접근에 실패했습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void createOrGoToChatRoom(String myUid, String opponentUid, String opponentName) {
+        // 두 사용자의 UID를 정렬하여 고유한 채팅방 ID를 생성합니다.
+        String chatRoomId;
+        if (myUid.compareTo(opponentUid) > 0) {
+            chatRoomId = myUid + "_" + opponentUid;
+        } else {
+            chatRoomId = opponentUid + "_" + myUid;
+        }
+
+        DatabaseReference chatRoomRef = FirebaseDatabase.getInstance().getReference("chat_rooms").child(chatRoomId);
+
+        // 채팅방이 이미 존재하는지 확인
+        chatRoomRef.get().addOnCompleteListener(task -> {
+            if (task.isSuccessful() && !task.getResult().exists()) {
+                // 채팅방이 없으면 새로 생성
+                Map<String, Object> participants = new HashMap<>();
+                participants.put(myUid, true);
+                participants.put(opponentUid, true);
+
+                Map<String, Object> roomData = new HashMap<>();
+                roomData.put("participants", participants);
+                roomData.put("lastMessage", "채팅방이 생성되었습니다.");
+                roomData.put("lastMessageTimestamp", System.currentTimeMillis());
+                chatRoomRef.setValue(roomData);
+
+                // 각 사용자의 채팅방 목록에도 추가
+                DatabaseReference userChatRoomsRef = FirebaseDatabase.getInstance().getReference("user_chat_rooms");
+                userChatRoomsRef.child(myUid).child(chatRoomId).setValue(true);
+                userChatRoomsRef.child(opponentUid).child(chatRoomId).setValue(true);
+            }
+
+            // 채팅방으로 이동
+            Intent intent = new Intent(PostDetailActivity.this, ChatActivity.class);
+            intent.putExtra("chatRoomId", chatRoomId);
+            intent.putExtra("opponentUserName", opponentName);
+            startActivity(intent);
+        });
+    }
+
+
+
 }
