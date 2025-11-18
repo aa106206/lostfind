@@ -34,7 +34,8 @@ public class PostListActivity extends AppCompatActivity {
         });
 
         writePostButton.setOnClickListener(v -> {
-
+            Intent intent = new Intent(PostListActivity.this, PostWriteActivity.class);
+            startActivity(intent);
         });
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
