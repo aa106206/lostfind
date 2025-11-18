@@ -14,6 +14,7 @@ import com.example.lostfind.databinding.ActivitySignupBinding;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class SignupActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -60,13 +61,25 @@ public class SignupActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, (Task<AuthResult> task) -> {
 
                     if (task.isSuccessful()) {
-                        // 회원가입 성공
-                        Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
 
-                        // 회원가입 후 로그인 화면 또는 메인 화면으로 이동
-                        Intent intent = new Intent(this, StartActivity.class);
-                        startActivity(intent);
-                        finish();
+
+                        String uid = mAuth.getCurrentUser().getUid();
+
+                        User user = new User(uid, name, email);
+
+                        FirebaseDatabase.getInstance().getReference("users")
+                                .child(uid)
+                                .setValue(user)
+                                .addOnSuccessListener(aVoid -> {
+                                    Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
+
+                                    // ④ 회원가입 후 이동
+                                    startActivity(new Intent(this, StartActivity.class));
+                                    finish();
+                                })
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, "회원 DB 저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                );
 
                     } else {
                         // 회원가입 실패

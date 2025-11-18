@@ -2,6 +2,7 @@ package com.example.lostfind;
 
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -114,7 +115,9 @@ public class PostWriteActivity extends AppCompatActivity {
         // TODO: 이미지 업로드 기능 추가 시 imageUrl을 실제 URL로 변경해야 함. 지금은 임시로 비워둠.
         String imageUrl = "";
 
-        // 4. Post 객체 생성 (이제 오류가 발생하지 않습니다)
+        // 4. Post 객체 생성
+        Log.d("PostWriteActivity", "currentUserId: " + currentUserId);
+        Log.d("PostWriteActivity", "postId: " + postId);
         Post newPost = new Post(postId, title, itemName, location, description, imageUrl, currentUserId, type);
 
         // 5. Firebase Realtime Database에 데이터 업로드

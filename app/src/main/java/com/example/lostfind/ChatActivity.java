@@ -33,7 +33,6 @@ public class ChatActivity extends AppCompatActivity {
     private Button fab;
     private DatabaseReference chatMessagesRef; // 메시지 경로 참조로 이름 변경
     private FirebaseUser currentUser;
-
     private String currentUserName = "Anonymous"; // 내 이름
     private String chatRoomId; // 현재 채팅방 ID
     private String opponentUserName; // 상대방 이름
