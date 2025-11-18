@@ -1,44 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    tools:context=".ChatActivity">
 
-    <ListView
-        android:id="@+id/listview"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_of_messages"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#ffffff"
-        android:dividerHeight="0dp" />
+        android:layout_height="match_parent"
+        android:layout_above="@+id/send_layout"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
 
     <LinearLayout
+        android:id="@+id/send_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
         android:orientation="horizontal"
-        android:padding="4dp"
-        android:background="@color/white"
-        android:gravity="center_vertical">
+        android:gravity="center_vertical"
+        android:padding="8dp">
 
         <EditText
-            android:id="@+id/et"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
+            android:id="@+id/input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Input message"
-            android:inputType="textMultiLine"
-            android:padding="10dp"
-            android:maxLines="3"
-            android:backgroundTint="@color/white"/>
+            android:hint="메시지를 입력하세요"
+            android:inputType="text"
+            android:background="@drawable/edittext_background"
+            android:padding="12dp"
+            android:minHeight="50dp"/>
+
         <Button
+            android:id="@+id/fab_send"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="send"
+            android:text="전송"
+            android:textColor="@color/white"
+            android:textStyle="bold"
             android:backgroundTint="@color/lightBlue"
             android:layout_marginLeft="8dp"
-            android:onClick="clickSend"/>
+            app:cornerRadius="10dp"/>
 
     </LinearLayout>
-</LinearLayout>
+
+</RelativeLayout>
