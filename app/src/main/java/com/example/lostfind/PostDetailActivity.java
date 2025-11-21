@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.text.format.DateUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -119,10 +120,44 @@ public class PostDetailActivity extends AppCompatActivity {
         postTitleDetail.setText(post.getTitle());
         lostItemName.setText(post.getItemName());
         postDescription.setText(post.getDescription());
-        // TODO: 작성자 이름, 프로필 이미지는 'users' DB에서 authorId로 가져와야 함 (지금은 임시 처리)
-        // userName.setText(post.getAuthorId()); // 우선 UID로 표시
-        // TODO: 타임스탬프(Long)를 "n분 전" 같은 형식의 문자열로 변환하여 표시해야 함.
-        // postTimestamp.setText(...);
+        if (post.getAuthorId() != null && !post.getAuthorId().isEmpty()) {
+            // "users" 경로에서 authorId에 해당하는 사용자의 정보를 가져옵니다.
+            DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("users").child(post.getAuthorId());
+            userRef.child("name").addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists()) {
+                        String authorName = dataSnapshot.getValue(String.class);
+                        userName.setText(authorName); // 가져온 이름으로 TextView 업데이트
+                    } else {
+                        userName.setText("알 수 없는 사용자"); // 해당 사용자가 DB에 없을 경우
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    userName.setText("이름 로딩 실패"); // 에러 발생 시
+                }
+            });
+        } else {
+            userName.setText("작성자 정보 없음");
+        }
+        if (post.getTimestamp() instanceof Long) {
+            long timestamp = (Long) post.getTimestamp();
+            long now = System.currentTimeMillis();
+
+            // DateUtils.getRelativeTimeSpanString() 사용
+            CharSequence relativeTime = DateUtils.getRelativeTimeSpanString(
+                    timestamp,
+                    now,
+                    DateUtils.MINUTE_IN_MILLIS, // 1분 단위까지는 "n분 전"으로 표시
+                    DateUtils.FORMAT_ABBREV_RELATIVE // "일" 대신 "일 전"과 같이 표시
+            );
+
+            postTimestamp.setText(relativeTime); // 변환된 시간으로 TextView 업데이트
+        } else {
+            postTimestamp.setText(""); // 타임스탬프 정보가 없을 경우
+        }
 
         // '습득(isfound)' 게시물일 경우에만 위치 정보 관련 뷰들을 보여줌
         if ("isfound".equalsIgnoreCase(post.getType())) {
@@ -244,7 +279,4 @@ public class PostDetailActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
 }
