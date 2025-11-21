@@ -33,7 +33,7 @@ public class PostDetailActivity extends AppCompatActivity {
     private TextView postTitleDetail, userName, postTimestamp, lostItemName, lostItemLocation, postDescription;
     private ImageView profileImage, postImageDetail;
     private View locationTextView, mapLocationTextView, mapContainer;
-    private Button editButton, deleteButton, sendMessageButton;
+    private Button editButton, deleteButton, sendMessageButton, back_button;
 
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
@@ -55,6 +55,10 @@ public class PostDetailActivity extends AppCompatActivity {
 
         initializeViews();
 
+        back_button.setOnClickListener(v -> {
+            onBackPressed();
+        });
+
         Intent intent = getIntent();
         postId = intent.getStringExtra("POST_ID");
 
@@ -68,6 +72,7 @@ public class PostDetailActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
+        back_button = findViewById(R.id.back_button);
         postTitleDetail = findViewById(R.id.post_title_detail);
         userName = findViewById(R.id.user_name);
         postTimestamp = findViewById(R.id.post_timestamp);

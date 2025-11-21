@@ -32,6 +32,8 @@ public class PostWriteActivity extends AppCompatActivity {
     private Button submitPostButton;
     private View locationTextView;
     private View mapLocationTextView;
+    private Button back_Button;
+
 
     // Firebase 관련 변수 선언
     private DatabaseReference databaseReference;
@@ -59,6 +61,10 @@ public class PostWriteActivity extends AppCompatActivity {
         // XML의 뷰(View)들과 자바 변수 연결
         initializeViews();
 
+        back_Button.setOnClickListener(v -> {
+            onBackPressed();
+        });
+
         // '습득' 체크박스 상태에 따라 위치 입력란 보이기/숨기기
         checkboxIsFound.setOnCheckedChangeListener((buttonView, isChecked) -> {
             int visibility = isChecked ? View.VISIBLE : View.GONE;
@@ -75,6 +81,7 @@ public class PostWriteActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
+        back_Button = findViewById(R.id.back_button);
         postTitleDetail = findViewById(R.id.post_title_detail);
         lostItemName = findViewById(R.id.lost_item_name);
         postDescription = findViewById(R.id.post_description);
