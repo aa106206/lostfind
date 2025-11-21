@@ -67,6 +67,9 @@
             android:name=".UserEmailActivity"
             android:exported="false" />
         <activity
+            android:name=".PostDetailActivity"
+            android:exported="true" />
+        <activity
             android:name=".UserNameActivity"
             android:exported="true">
             <intent-filter>
@@ -116,9 +119,9 @@
         <activity
             android:name=".PostWriteActivity"
             android:exported="true" />
-        <activity
-            android:name=".PostDetailActivity"
-            android:exported="true" />
+<!--        <activity-->
+<!--            android:name=".PostDetailActivity"-->
+<!--            android:exported="true" />-->
         <activity
             android:name=".ChatActivity"
             android:exported="true" />
