@@ -6,6 +6,7 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Gravity;
 
 import com.example.lostfind.databinding.NavigationBinding;
@@ -16,6 +17,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.lostfind.databinding.ActivityMapsBinding;
+import com.google.firebase.Firebase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -29,6 +35,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(mapBinding.getRoot());
 
         NavigationBinding naviBinding = NavigationBinding.bind(findViewById(R.id.nav_view));
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
+        ref.get().addOnSuccessListener(snapshot -> {
+            String name = snapshot.child("name").getValue(String.class);
+            String email = snapshot.child("email").getValue(String.class);
+            naviBinding.userName.setText(name);
+            naviBinding.userEmail.setText(email);
+        });
+
 
         DrawerLayout drawerLayout = mapBinding.drawerLayout;
         mapBinding.naviBtn.setOnClickListener(v -> {
