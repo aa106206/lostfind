@@ -58,12 +58,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         naviBinding.goChat.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ChatListActivity.class);
-            startActivity(intent);
-        });
-
-        naviBinding.goChat.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ChatListActivity.class);
+            Intent intent = new Intent(this, ChatRoomListActivity.class);
             startActivity(intent);
         });
 

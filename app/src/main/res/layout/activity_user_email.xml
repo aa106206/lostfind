@@ -28,7 +28,7 @@
             android:id="@+id/txtTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="비밀번호 변경"
+            android:text="MAIL 변경"
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginStart="12dp" />
@@ -36,31 +36,35 @@
 
 
     <!-- 안내 텍스트 -->
-    <EditText
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:hint="기존 비밀번호 입력"
-        android:padding="12dp"
-        android:textSize="16sp"
-        android:layout_marginTop="16dp" />
+    <TextView
+        android:id="@+id/currentEmailTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="현재 mail주소"
+        android:textSize="15sp"
+        android:textColor="#555555"
+        android:layout_marginTop="30dp" />
 
 
     <!-- 이름 입력창 -->
     <EditText
+        android:id="@+id/editNewName"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:hint="새 비밀번호 입력"
+        android:hint="새 mail 입력"
         android:padding="12dp"
         android:textSize="16sp"
         android:layout_marginTop="16dp" />
 
+    <!-- activity_user_email.xml 예시 -->
     <EditText
+        android:id="@+id/current_password_edit_text"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:hint="새 비밀번호 재입력"
+        android:hint="현재 비밀번호를 입력하세요"
         android:padding="12dp"
         android:textSize="16sp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"/>
 
 
     <!-- 저장 버튼 -->
