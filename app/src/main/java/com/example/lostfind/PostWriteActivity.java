@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -32,6 +33,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID; // 고유 파일 이름 생성을 위해 추가
 
 import okhttp3.Call;
@@ -43,7 +47,10 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class PostWriteActivity extends AppCompatActivity {
-
+    public interface OnResultListener {
+        void onSuccess(String result);
+        void onError(String error);
+    }
     // --- 뷰 변수들 ---
     private Button back_Button;
     private EditText postTitleDetail, lostItemName, postDescription, lostItemLocation;
@@ -137,56 +144,6 @@ public class PostWriteActivity extends AppCompatActivity {
         });
     }
 
-//testGeminiApi는 박동준이 Gemini 테스트 하려고 넣은 코드임
-    private void testGeminiApi() {
-//        String apiKey = BuildConfig.GEMINI_API_KEY;
-        String apiKey="AIzaSyCQvTfmmo_dZXngI5yYG8otAVO3_4KYuTM";
-//        Log.d("Mykey",apiKey);
-        OkHttpClient client = new OkHttpClient();
-
-        try {
-            JSONObject text = new JSONObject();
-            text.put("text", "나는 도서관 6층에서 에어팟을 주웠어. 내가 습득한 에어팟에는 파란색으로 홍길동이라고 적혀있어. 이 문장을 습득위치, 분실물 물품, 분실물 특징 이렇게 3가지 특징으로 추출해줘");
-
-            JSONArray parts = new JSONArray();
-            parts.put(text);
-
-            JSONObject contents = new JSONObject();
-            contents.put("parts", parts);
-
-            JSONArray data = new JSONArray();
-            data.put(contents);
-
-            JSONObject requestBody = new JSONObject();
-            requestBody.put("contents", data);
-
-            Request request = new Request.Builder()
-                    .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey)
-
-
-                    .post(RequestBody.create(
-                            requestBody.toString(),
-                            MediaType.parse("application/json")
-                    ))
-                    .build();
-
-            client.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    String res = response.body().string();
-                    Log.d("GeminiTest", "결과: " + res);
-                }
-
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Log.e("GeminiTest", "오류 발생: " + e.getMessage());
-                }
-            });
-
-        } catch (Exception e) {
-            Log.e("GeminiTest", "JSON 오류: " + e.getMessage());
-        }
-    }
 
 
 
@@ -209,9 +166,6 @@ public class PostWriteActivity extends AppCompatActivity {
             // 이미지가 없는 경우, 바로 게시물 텍스트 정보만 업로드
             uploadPostDetails(title, itemName, description, location, ""); // 이미지 URL은 빈 문자열로 전달
         }
-
-        testGeminiApi();  //박동준이 Gemini 테스트하려고 테스트로 만든 코드임. 테스트용이니깐 테스트 끝나면 지우자
-
     }
 
     // ★★★ 이미지 업로드와 게시물 정보 업로드를 함께 처리하는 메서드 ★★★
@@ -250,11 +204,173 @@ public class PostWriteActivity extends AppCompatActivity {
 
         databaseReference.child(postId).setValue(newPost)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(PostWriteActivity.this, "게시물이 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show();
-                    finish();
+                    //박동준이 addOnSuccessListener 내부만 바꿈
+                    if (isFound) {
+                        analyzeFoundPostToGemini(title, itemName, location, description, imageUri, new OnResultListener() {
+                            @Override
+                            public void onSuccess(String res) {
+                                Log.d("Gemini", "Gemini 분석 성공: " + res);
+
+                                try {
+                                    // 1) Gemini 응답에서 JSON 텍스트만 추출
+                                    JSONObject json = extractGeminiJsonOnly(res);
+
+                                    // 2) Firebase에 저장
+                                    saveGeminiResultToFirebase(postId, json);
+
+                                } catch (Exception e) {
+                                    Log.e("Gemini", "JSON 파싱 오류: " + e.getMessage());
+                                }
+
+                                // Gemini 저장 후 finish() 호출
+                                runOnUiThread(() -> {
+                                    Toast.makeText(PostWriteActivity.this, "게시물이 등록되었습니다.", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                });
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                Log.e("Gemini", "Gemini 오류: " + error);
+
+                                runOnUiThread(() -> {
+                                    Toast.makeText(PostWriteActivity.this, "게시물은 등록되었으나 AI 분석이 실패했습니다.", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                });
+                            }
+                        });
+
+                    } else {
+                        // islost이거나 이미지가 없으면 그냥 바로 종료
+                        Toast.makeText(PostWriteActivity.this, "게시물이 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                    //여기까지 박동준이 addOnSuccessListener 내부만 바꿈
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(PostWriteActivity.this, "게시물 정보 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    //analyzeFoundPostToGemini는 박동준이 Gemini 테스트 하려고 넣은 함수임
+    private void analyzeFoundPostToGemini(String title, String itemName, String location,String description, Uri imageUri, OnResultListener listener) {
+//        String apiKey = BuildConfig.GEMINI_API_KEY;
+        String apiKey="AIzaSyCQvTfmmo_dZXngI5yYG8otAVO3_4KYuTM";
+
+        OkHttpClient client = new OkHttpClient();
+
+        try {
+            // 1. 이미지 Base64 변환
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            byte[] imageBytes = new byte[inputStream.available()];
+            inputStream.read(imageBytes);
+            String base64Image = Base64.encodeToString(imageBytes, Base64.NO_WRAP);
+
+            // 2. 프롬프트
+            String prompt =
+                    "You are an AI that extracts structured information from lost & found posts.\n\n" +
+                            "Analyze the following 'found item post' and extract 4 fields:\n\n" +
+                            "1. found_location\n" +
+                            "2. item_name\n" +
+                            "3. item_features\n" +
+                            "4. image_features\n\n" +
+                            "Return JSON ONLY:\n" +
+                            "{\n" +
+                            "  \"found_location\": \"\",\n" +
+                            "  \"item_name\": \"\",\n" +
+                            "  \"item_features\": \"\",\n" +
+                            "  \"image_features\": \"\"\n" +
+                            "}\n\n" +
+                            "POST TEXT:\n" + title + "\n" + itemName+"\n" + location+"\n" + description;
+
+            // 3. JSON Request body
+            JSONObject requestBody = new JSONObject();
+
+            JSONArray contents = new JSONArray();
+            JSONObject partsObj = new JSONObject();
+            JSONArray parts = new JSONArray();
+
+            // Text part
+            parts.put(new JSONObject().put("text", prompt));
+
+            // Image part
+            parts.put(new JSONObject()
+                    .put("inline_data",
+                            new JSONObject()
+                                    .put("mime_type", "image/jpeg")
+                                    .put("data", base64Image)
+                    )
+            );
+
+            partsObj.put("parts", parts);
+            contents.put(partsObj);
+            requestBody.put("contents", contents);
+
+            // 4. Build request
+            Request request = new Request.Builder()
+                    .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey)
+                    .post(RequestBody.create(
+                            requestBody.toString(),
+                            MediaType.parse("application/json")
+                    ))
+                    .build();
+
+            // 5. Execute
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String res = response.body().string();
+                    listener.onSuccess(res);
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    listener.onError(e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            listener.onError(e.getMessage());
+        }
+    }
+
+//    private JSONObject extractGeminiJsonOnly(String res) throws Exception {
+//        JSONObject root = new JSONObject(res);
+//        JSONArray candidates = root.getJSONArray("candidates");
+//        JSONObject content = candidates.getJSONObject(0).getJSONObject("content");
+//        JSONArray parts = content.getJSONArray("parts");
+//        String jsonText = parts.getJSONObject(0).getString("text");
+//        return new JSONObject(jsonText);
+//    }
+private JSONObject extractGeminiJsonOnly(String res) throws Exception {
+    JSONObject root = new JSONObject(res);
+    JSONArray candidates = root.getJSONArray("candidates");
+    JSONObject content = candidates.getJSONObject(0).getJSONObject("content");
+    JSONArray parts = content.getJSONArray("parts");
+
+    String jsonText = parts.getJSONObject(0).getString("text");
+
+    // 1) 앞/뒤에 붙은 ```json 또는 ``` 제거
+    jsonText = jsonText.replace("```json", "")
+            .replace("```", "")
+            .trim();
+
+    // 2) 줄바꿈 제거
+    if (jsonText.startsWith("\n")) jsonText = jsonText.substring(1).trim();
+
+    // 3) 이제 진짜 JSON으로 변환
+    return new JSONObject(jsonText);
+}
+
+    private void saveGeminiResultToFirebase(String postId, JSONObject json) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts").child(postId).child("gemini");
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("found_location", json.optString("found_location"));
+        map.put("item_name", json.optString("item_name"));
+        map.put("item_features", json.optString("item_features"));
+        map.put("image_features", json.optString("image_features"));
+
+        ref.setValue(map);
     }
 }
