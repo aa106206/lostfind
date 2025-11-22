@@ -35,6 +35,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID; // 고유 파일 이름 생성을 위해 추가
 
@@ -218,16 +219,19 @@ public class PostWriteActivity extends AppCompatActivity {
                                     // 2) Firebase에 저장
                                     saveGeminiResultToFirebase(postId, json);
 
+                                    // 3) 🟦 매칭 알고리즘 시작
+                                    startMatchingFlow(postId);
+
                                 } catch (Exception e) {
                                     Log.e("Gemini", "JSON 파싱 오류: " + e.getMessage());
                                 }
-
-                                // Gemini 저장 후 finish() 호출
                                 runOnUiThread(() -> {
                                     Toast.makeText(PostWriteActivity.this, "게시물이 등록되었습니다.", Toast.LENGTH_SHORT).show();
                                     finish();
                                 });
+
                             }
+
 
                             @Override
                             public void onError(String error) {
@@ -334,14 +338,6 @@ public class PostWriteActivity extends AppCompatActivity {
         }
     }
 
-//    private JSONObject extractGeminiJsonOnly(String res) throws Exception {
-//        JSONObject root = new JSONObject(res);
-//        JSONArray candidates = root.getJSONArray("candidates");
-//        JSONObject content = candidates.getJSONObject(0).getJSONObject("content");
-//        JSONArray parts = content.getJSONArray("parts");
-//        String jsonText = parts.getJSONObject(0).getString("text");
-//        return new JSONObject(jsonText);
-//    }
 private JSONObject extractGeminiJsonOnly(String res) throws Exception {
     JSONObject root = new JSONObject(res);
     JSONArray candidates = root.getJSONArray("candidates");
@@ -373,4 +369,75 @@ private JSONObject extractGeminiJsonOnly(String res) throws Exception {
 
         ref.setValue(map);
     }
+
+    private void startMatchingFlow(String postId) {
+        // Step1: Lost 게시글 전체 불러오기
+        GeminiLostPostLoader.loadLostPosts(new GeminiLostPostLoader.OnLostPostsLoaded() {
+            @Override
+            public void onSuccess(List<Post> lostPosts) {
+                // Step2: Found 게시글의 Gemini JSON 불러오기
+                loadFoundGeminiJson(postId, lostPosts);
+            }
+            @Override
+            public void onError(String error) {
+                Log.e("Match", "Lost load error: " + error);
+            }
+        });
+    }
+
+
+    private void loadFoundGeminiJson(String postId, List<Post> lostPosts) {
+
+        DatabaseReference ref = FirebaseDatabase.getInstance()
+                .getReference("posts")
+                .child(postId)
+                .child("gemini");
+
+        ref.get().addOnSuccessListener(snapshot -> {
+            if (!snapshot.exists()) {
+                Log.e("Match", "Gemini JSON 없음");
+                return;
+            }
+
+            try {
+                JSONObject foundJson = new JSONObject((Map) snapshot.getValue());
+
+                // Step3: GeminiMatcher 호출
+                requestMatching(foundJson, lostPosts);
+
+            } catch (Exception e) {
+                Log.e("Match", "Found JSON parse error: " + e.getMessage());
+            }
+
+        }).addOnFailureListener(e -> {
+            Log.e("Match", "Gemini load error: " + e.getMessage());
+        });
+    }
+
+    private void requestMatching(JSONObject foundJson, List<Post> lostPosts) {
+
+        GeminiMatcher.matchFoundWithLost(foundJson, lostPosts, new GeminiMatcher.MatchCallback() {
+            @Override
+            public void onSuccess(JSONArray matches) {
+
+                Log.d("Match", "매칭 결과: " + matches.toString());
+
+                // TODO: FCM 알림은 여기서 호출 예정
+
+                runOnUiThread(() ->
+                        Toast.makeText(PostWriteActivity.this,
+                                "AI 매칭 완료: " + matches.length() + "개 발견", Toast.LENGTH_SHORT).show()
+                );
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("Match", "매칭 오류: " + error);
+            }
+        });
+    }
+
+
+
+
 }

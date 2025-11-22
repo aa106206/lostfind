@@ -13,6 +13,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lostfind">
         <activity
+            android:name=".GeminiMatcher"
+            android:exported="false" />
+        <activity
+            android:name=".GeminiLostPostLoader"
+            android:exported="false" />
+        <activity
             android:name=".ChatRoomListActivity"
             android:exported="true">
             <intent-filter>
