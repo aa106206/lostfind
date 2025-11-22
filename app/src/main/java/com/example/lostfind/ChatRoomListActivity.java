@@ -35,6 +35,10 @@ public class ChatRoomListActivity extends AppCompatActivity {
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
         loadChatRooms();
+
+        findViewById(R.id.btn_back).setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void loadChatRooms() {

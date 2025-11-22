@@ -121,6 +121,16 @@ public class InfoActivity extends AppCompatActivity {
         });
 
         binding.imageButton.setOnClickListener(v -> finish()); // 뒤로가기 버튼
+
+        binding.bookmarkButton.setOnClickListener(v -> {
+            Intent intent = new Intent(InfoActivity.this, BookmarkActivity.class);
+            startActivity(intent);
+        });
+
+        binding.pointshopButton.setOnClickListener(v -> {
+            Intent intent = new Intent(InfoActivity.this, PointShopActivity.class);
+            startActivity(intent);
+        });
     }
 
     /**

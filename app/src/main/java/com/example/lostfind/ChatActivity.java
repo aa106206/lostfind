@@ -123,6 +123,10 @@ public class ChatActivity extends AppCompatActivity {
                 displayChatMessages();
             }
         });
+
+        findViewById(R.id.btn_back).setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void sendMessage() {

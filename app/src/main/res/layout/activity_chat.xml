@@ -5,15 +5,50 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
     tools:context=".ChatActivity">
+
+    <!-- 상단 툴바 레이아웃 -->
+    <RelativeLayout
+        android:id="@+id/toolbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_alignParentTop="true"
+        android:background="@color/white"
+        android:elevation="4dp">  <!-- 툴바에 그림자 효과 추가 -->
+
+        <!-- 채팅 상대방 이름 TextView: 화면 중앙 정렬 -->
+        <TextView
+            android:id="@+id/chat_user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            tools:text="상대방 이름"
+            android:textColor="@color/black"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- 뒤로가기 ImageButton: 왼쪽 정렬 -->
+        <ImageButton
+            android:id="@+id/btn_back"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/left_arrow" />
+
+    </RelativeLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list_of_messages"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/send_layout"
-        android:layout_alignParentTop="true"
-        android:layout_marginBottom="16dp"
+        android:layout_below="@id/toolbar_layout"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
 
@@ -24,6 +59,8 @@
         android:layout_alignParentBottom="true"
         android:orientation="horizontal"
         android:gravity="center_vertical"
+        android:background="@color/white"
+        android:elevation="8dp"
         android:padding="8dp">
 
         <EditText
@@ -34,7 +71,7 @@
             android:hint="메시지를 입력하세요"
             android:inputType="text"
             android:background="@drawable/edittext_background"
-            android:padding="12dp"
+            android.padding="12dp"
             android:minHeight="50dp"/>
 
         <Button
