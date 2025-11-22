@@ -46,7 +46,7 @@
             android:layout_height="100dp"
             android:scaleType="centerCrop"
             android:adjustViewBounds="true"
-            android:src="@drawable/info_icon"
+            android:src="@drawable/default_infoicon"
             android:layout_weight="1" />
 
 

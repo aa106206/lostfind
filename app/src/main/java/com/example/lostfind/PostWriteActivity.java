@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -27,7 +28,19 @@ import com.google.firebase.storage.FirebaseStorage; // Firebase Storage import �
 import com.google.firebase.storage.StorageReference; // StorageReference import 추가
 import com.google.firebase.storage.UploadTask; // UploadTask import 추가
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.UUID; // 고유 파일 이름 생성을 위해 추가
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class PostWriteActivity extends AppCompatActivity {
 
@@ -124,6 +137,59 @@ public class PostWriteActivity extends AppCompatActivity {
         });
     }
 
+//testGeminiApi는 박동준이 Gemini 테스트 하려고 넣은 코드임
+    private void testGeminiApi() {
+//        String apiKey = BuildConfig.GEMINI_API_KEY;
+        String apiKey="AIzaSyCQvTfmmo_dZXngI5yYG8otAVO3_4KYuTM";
+//        Log.d("Mykey",apiKey);
+        OkHttpClient client = new OkHttpClient();
+
+        try {
+            JSONObject text = new JSONObject();
+            text.put("text", "나는 도서관 6층에서 에어팟을 주웠어. 내가 습득한 에어팟에는 파란색으로 홍길동이라고 적혀있어. 이 문장을 습득위치, 분실물 물품, 분실물 특징 이렇게 3가지 특징으로 추출해줘");
+
+            JSONArray parts = new JSONArray();
+            parts.put(text);
+
+            JSONObject contents = new JSONObject();
+            contents.put("parts", parts);
+
+            JSONArray data = new JSONArray();
+            data.put(contents);
+
+            JSONObject requestBody = new JSONObject();
+            requestBody.put("contents", data);
+
+            Request request = new Request.Builder()
+                    .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey)
+
+
+                    .post(RequestBody.create(
+                            requestBody.toString(),
+                            MediaType.parse("application/json")
+                    ))
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    String res = response.body().string();
+                    Log.d("GeminiTest", "결과: " + res);
+                }
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Log.e("GeminiTest", "오류 발생: " + e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e("GeminiTest", "JSON 오류: " + e.getMessage());
+        }
+    }
+
+
+
     private void uploadPost() {
         String title = postTitleDetail.getText().toString().trim();
         String itemName = lostItemName.getText().toString().trim();
@@ -143,6 +209,9 @@ public class PostWriteActivity extends AppCompatActivity {
             // 이미지가 없는 경우, 바로 게시물 텍스트 정보만 업로드
             uploadPostDetails(title, itemName, description, location, ""); // 이미지 URL은 빈 문자열로 전달
         }
+
+        testGeminiApi();  //박동준이 Gemini 테스트하려고 테스트로 만든 코드임. 테스트용이니깐 테스트 끝나면 지우자
+
     }
 
     // ★★★ 이미지 업로드와 게시물 정보 업로드를 함께 처리하는 메서드 ★★★

@@ -16,6 +16,15 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        //아래 두줄은 Gemini API를 사용하기 위해 추가(key값 보안때문)
+        val geminiApiKey: String = project.findProperty("gemini.api.key") as String? ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+    }
+
+    //아래 두 줄도 박동준이 Gemini 테스트 하기 위해서 넣은 코드임
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -58,4 +67,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
+
+//    아래 두줄은 Gemini API를 사용하기 위해 추가
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+    implementation("com.google.code.gson:gson:2.10.1")
+
 }

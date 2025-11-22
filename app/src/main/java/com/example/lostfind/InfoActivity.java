@@ -15,6 +15,10 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 
 import com.example.lostfind.databinding.MyinfoBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class InfoActivity extends AppCompatActivity {
 
@@ -27,6 +31,16 @@ public class InfoActivity extends AppCompatActivity {
 
         MyinfoBinding binding = MyinfoBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
+        ref.get().addOnSuccessListener(snapshot -> {
+            String name = snapshot.child("name").getValue(String.class);
+            String email = snapshot.child("email").getValue(String.class);
+            binding.userName.setText(name);
+            binding.userEmail.setText(email);
+        });
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
