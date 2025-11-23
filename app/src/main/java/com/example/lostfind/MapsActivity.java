@@ -98,9 +98,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Add a marker in Sydney and move the camera
         LatLng soongsil = new LatLng(37.494618, 126.959667);
+        LatLng studentHall = new LatLng(37.496845, 126.956781);
+        LatLng library = new LatLng(37.496306, 126.958539);
 
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(soongsil, 20));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(soongsil, 17));
 
         mMap.addMarker(new MarkerOptions().position(soongsil).title("정보섬"));
+        mMap.addMarker(new MarkerOptions().position(soongsil).title("학생회관 406호"));
+        mMap.addMarker(new MarkerOptions().position(soongsil).title("도서관 1층"));
+
     }
 }
