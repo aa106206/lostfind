@@ -71,5 +71,5 @@ dependencies {
 //    아래 두줄은 Gemini API를 사용하기 위해 추가
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
     implementation("com.google.code.gson:gson:2.10.1")
-
+    implementation("com.google.firebase:firebase-messaging:23.2.1")
 }

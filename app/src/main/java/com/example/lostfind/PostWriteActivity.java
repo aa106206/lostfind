@@ -423,11 +423,26 @@ private JSONObject extractGeminiJsonOnly(String res) throws Exception {
                 Log.d("Match", "매칭 결과: " + matches.toString());
 
                 // TODO: FCM 알림은 여기서 호출 예정
+                try {
+                    for (int i = 0; i < matches.length(); i++) {
+                        JSONObject obj = matches.getJSONObject(i);
 
-                runOnUiThread(() ->
-                        Toast.makeText(PostWriteActivity.this,
-                                "AI 매칭 완료: " + matches.length() + "개 발견", Toast.LENGTH_SHORT).show()
-                );
+                        String matchedPostId = obj.getString("lostPostId");  // ✔ 추출 완료
+                        Log.d("Match", "매칭된 postId = " + matchedPostId);
+
+                        // 🔥 매칭된 게시글의 작성자에게 알림 보내기
+                        notifyMatchedUser(matchedPostId);
+                    }
+                } catch (Exception e) {
+                    Log.e("Match", "매칭 처리 오류: " + e.getMessage());
+                }
+
+
+
+//                runOnUiThread(() ->
+//                        Toast.makeText(PostWriteActivity.this,
+//                                "AI 매칭 완료: " + matches.length() + "개 발견", Toast.LENGTH_SHORT).show()
+//                );
             }
 
             @Override
@@ -437,6 +452,33 @@ private JSONObject extractGeminiJsonOnly(String res) throws Exception {
         });
     }
 
+    private void notifyMatchedUser(String postId) {
+
+        FirebaseDatabase.getInstance().getReference("posts")
+                .child(postId)
+                .child("authorId")
+                .get()
+                .addOnSuccessListener(snap -> {
+
+                    String userId = snap.getValue(String.class);  // 분실글 작성자 UID
+
+                    if (userId != null) {
+
+                        // Cloud Functions가 FCM을 보내기 위한 데이터 생성
+                        DatabaseReference ref = FirebaseDatabase.getInstance()
+                                .getReference("notifications")
+                                .child(userId)
+                                .push();
+
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("title", "습득물과 매칭되었습니다!");
+                        map.put("body", "당신이 잃어버린 물건이 발견된 것 같아요.");
+
+                        ref.setValue(map);  // ← Functions 트리거됨! (sendMatchNotification 실행)
+                    }
+
+                });
+    }
 
 
 

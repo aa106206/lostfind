@@ -19,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -45,6 +47,18 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, (Task<AuthResult> task) -> {
                     if (task.isSuccessful()) {
                         // 로그인 성공
+
+                        //FCM을 위해 FCM 토큰 추출
+                        FirebaseMessaging.getInstance().getToken()
+                                .addOnSuccessListener(token -> {
+                                    String uid = FirebaseAuth.getInstance().getUid();
+                                    FirebaseDatabase.getInstance().getReference("users")
+                                            .child(uid)
+                                            .child("fcmToken")
+                                            .setValue(token);
+                                });
+
+
                         Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show();
 
                         // MapsActivity 이동
