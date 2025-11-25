@@ -28,6 +28,16 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage; // Firebase Storage import 추가
 import com.google.firebase.storage.StorageReference; // StorageReference import 추가
 import com.google.firebase.storage.UploadTask; // UploadTask import 추가
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+
+//
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -47,7 +57,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class PostWriteActivity extends AppCompatActivity {
+public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCallback{
     public interface OnResultListener {
         void onSuccess(String result);
         void onError(String error);
@@ -70,6 +80,11 @@ public class PostWriteActivity extends AppCompatActivity {
     // --- 이미지 데이터 관련 변수 ---
     private Uri imageUri = null; // ★★★ 선택된 이미지의 Uri를 저장할 변수 ★★★
     private ActivityResultLauncher<Intent> galleryLauncher; // ★★★ 갤러리 결과를 처리할 런처 ★★★
+
+    // --- 지도 관련 변수 추가 ---
+    private GoogleMap mMap;
+    private Marker currentMarker; // 현재 찍혀있는 마커를 저장할 변수
+    private LatLng selectedLatLng = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +121,12 @@ public class PostWriteActivity extends AppCompatActivity {
                 }
         );
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_container);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this); // 준비가 완료되면 onMapReady가 호출됨
+        }
+
         // --- 클릭 리스너 설정 ---
         setupClickListeners();
     }
@@ -125,6 +146,38 @@ public class PostWriteActivity extends AppCompatActivity {
         mapLocationTextView = findViewById(R.id.map_location_text_view);
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap; // 지도가 준비되면 GoogleMap 객체를 전역 변수에 할당
+
+        // 기본 카메라 위치 설정 (예: 서울)
+        LatLng seoul = new LatLng(37.496349, 126.957454);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 15f));
+
+        Toast.makeText(this, "습득한 위치를 지도에서 한번만 탭하세요.", Toast.LENGTH_SHORT).show();
+
+        // ★★★ 지도 클릭 리스너 설정 ★★★
+        mMap.setOnMapClickListener(latLng -> {
+            // 1. 선택된 위도/경도를 전역 변수에 저장
+            selectedLatLng = latLng;
+
+            // 2. 이전에 찍힌 마커가 있다면 제거
+            if (currentMarker != null) {
+                currentMarker.remove();
+            }
+
+            // 3. 새로운 위치에 마커 추가
+            MarkerOptions markerOptions = new MarkerOptions();
+            markerOptions.position(latLng);
+            markerOptions.title("선택한 위치");
+            currentMarker = mMap.addMarker(markerOptions);
+
+            // 4. 위치 정보를 EditText에도 간략히 표시
+            String locationText = String.format("lat: %.4f, lng: %.4f", latLng.latitude, latLng.longitude);
+            lostItemLocation.setText(locationText);
+        });
+    }
+
     private void setupClickListeners() {
         back_Button.setOnClickListener(v -> onBackPressed());
 
@@ -139,10 +192,12 @@ public class PostWriteActivity extends AppCompatActivity {
         checkboxIsFound.setOnCheckedChangeListener((buttonView, isChecked) -> {
             int visibility = isChecked ? View.VISIBLE : View.GONE;
             lostItemLocation.setVisibility(visibility);
+            findViewById(R.id.map_container).setVisibility(visibility); // ID로 직접 접근
             mapContainer.setVisibility(visibility);
             if (locationTextView != null) locationTextView.setVisibility(visibility);
             if (mapLocationTextView != null) mapLocationTextView.setVisibility(visibility);
         });
+        lostItemLocation.setFocusable(false);
     }
 
 
@@ -203,6 +258,11 @@ public class PostWriteActivity extends AppCompatActivity {
 
         Post newPost = new Post(postId, title, itemName, location, description, imageUrl, currentUserId, type);
 
+        if (isFound && selectedLatLng != null) {
+            newPost.setLatitude(selectedLatLng.latitude);
+            newPost.setLongitude(selectedLatLng.longitude);
+        }
+
         databaseReference.child(postId).setValue(newPost)
                 .addOnSuccessListener(aVoid -> {
                     //박동준이 addOnSuccessListener 내부만 바꿈
@@ -255,6 +315,7 @@ public class PostWriteActivity extends AppCompatActivity {
                     Toast.makeText(PostWriteActivity.this, "게시물 정보 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
+
 
     //analyzeFoundPostToGemini는 박동준이 Gemini 테스트 하려고 넣은 함수임
     private void analyzeFoundPostToGemini(String title, String itemName, String location,String description, Uri imageUri, OnResultListener listener) {

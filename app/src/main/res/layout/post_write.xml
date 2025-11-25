@@ -151,14 +151,14 @@
                         android:text="위치"
                         android:visibility="gone"/>
 
-                    <FrameLayout
+                    <androidx.fragment.app.FragmentContainerView
                         android:id="@+id/map_container"
+                        android:name="com.google.android.gms.maps.SupportMapFragment"
                         android:layout_width="match_parent"
-                        android:layout_height="150dp"
+                        android:layout_height="200dp"
                         android:layout_marginTop="8dp"
-                        android:background="@android:color/darker_gray"
-                        android:contentDescription="지도 위치"
-                        android:visibility="gone"/>
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                     <TextView
                         android:layout_width="wrap_content"

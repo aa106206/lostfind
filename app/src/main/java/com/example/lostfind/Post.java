@@ -13,6 +13,9 @@ public class Post {
     private String type; // "isLost" 또는 "isFound"
     private Object timestamp;
 
+    private double latitude;
+    private double longitude;
+
 
     public Post() {}
 
@@ -37,4 +40,9 @@ public class Post {
     public String getAuthorId() { return authorId; }
     public String getType() { return type; }
     public Object getTimestamp() { return timestamp; }
+    public double getLatitude() { return latitude; }
+    public double getLongitude() { return longitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
 }
