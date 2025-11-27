@@ -1,5 +1,6 @@
 package com.example.lostfind;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;import android.provider.MediaStore;
@@ -14,6 +15,8 @@ import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView; // ImageView import 추가
 import android.widget.Toast;
+import android.widget.ScrollView; // ScrollView를 위해 import 추가
+import android.view.MotionEvent;
 
 import androidx.activity.result.ActivityResultLauncher; // ActivityResultLauncher import 추가
 import androidx.activity.result.contract.ActivityResultContracts; // ActivityResultContracts import 추가
@@ -70,6 +73,8 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
     private ImageView postImageDetail; // ★★★ 이미지뷰 변수 추가 ★★★
     private FrameLayout mapContainer;
     private View locationTextView, mapLocationTextView;
+    private ScrollView mainScrollView;
+    private View transparentView;
 
     // --- Firebase 관련 변수들 ---
     private DatabaseReference databaseReference;
@@ -129,9 +134,13 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
 
         // --- 클릭 리스너 설정 ---
         setupClickListeners();
+        // ★★★ 스크롤뷰와 투명 뷰에 터치 리스너 설정 ★★★
+        setupMapTouchListener();
     }
 
     private void initializeViews() {
+        mainScrollView = findViewById(R.id.scrollView);
+        transparentView = findViewById(R.id.transparent_view);
         back_Button = findViewById(R.id.back_button);
         postTitleDetail = findViewById(R.id.post_title_detail);
         lostItemName = findViewById(R.id.lost_item_name);
@@ -192,12 +201,32 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         checkboxIsFound.setOnCheckedChangeListener((buttonView, isChecked) -> {
             int visibility = isChecked ? View.VISIBLE : View.GONE;
             lostItemLocation.setVisibility(visibility);
-            findViewById(R.id.map_container).setVisibility(visibility); // ID로 직접 접근
-            mapContainer.setVisibility(visibility);
+            findViewById(R.id.map_wrapper).setVisibility(visibility); // ID로 직접 접근
             if (locationTextView != null) locationTextView.setVisibility(visibility);
             if (mapLocationTextView != null) mapLocationTextView.setVisibility(visibility);
         });
         lostItemLocation.setFocusable(false);
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private void setupMapTouchListener() {
+        transparentView.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    // 손가락이 닿는 순간, ScrollView가 터치 이벤트를 가로채지 못하게 함
+                    // (지도에 터치 이벤트를 전달하기 위함)
+                    mainScrollView.requestDisallowInterceptTouchEvent(true);
+                    return false; // 터치 이벤트를 계속 받기 위해 false 반환
+
+                case MotionEvent.ACTION_UP:
+                    // 손가락을 떼는 순간, 다시 ScrollView가 터치 이벤트를 가로챌 수 있게 함
+                    mainScrollView.requestDisallowInterceptTouchEvent(false);
+                    return true; // 터치 이벤트를 여기서 끝내기 위해 true 반환
+
+                default:
+                    return true;
+            }
+        });
     }
 
 

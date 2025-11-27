@@ -36,6 +36,7 @@
     </LinearLayout>
 
     <ScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/bottom_bar"
@@ -151,14 +152,29 @@
                         android:text="위치"
                         android:visibility="gone"/>
 
-                    <androidx.fragment.app.FragmentContainerView
-                        android:id="@+id/map_container"
-                        android:name="com.google.android.gms.maps.SupportMapFragment"
+                    <FrameLayout
+                        android:id="@+id/map_wrapper"
                         android:layout_width="match_parent"
                         android:layout_height="200dp"
                         android:layout_marginTop="8dp"
                         android:visibility="gone"
-                        tools:visibility="visible" />
+                        tools:visibility="visible">
+
+                        <!-- 기존 지도 컨테이너 -->
+                        <androidx.fragment.app.FragmentContainerView
+                            android:id="@+id/map_container"
+                            android:name="com.google.android.gms.maps.SupportMapFragment"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" />
+
+                        <!-- ★★★ 지도 위에 덮어씌울 투명한 View ★★★ -->
+                        <View
+                            android:id="@+id/transparent_view"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@android:color/transparent" />
+
+                    </FrameLayout>
 
                     <TextView
                         android:layout_width="wrap_content"
