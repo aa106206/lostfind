@@ -80,7 +80,7 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map_view);
+                .findFragmentById(R.id.map_container);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
@@ -192,7 +192,7 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
 
         // '습득(isfound)' 게시물일 경우에만 위치 정보 관련 뷰들을 보여줌
         if ("isfound".equalsIgnoreCase(post.getType()) && postLatLng != null) {
-            findViewById(R.id.map_view).setVisibility(View.VISIBLE);
+            findViewById(R.id.map_container).setVisibility(View.VISIBLE);
             lostItemLocation.setVisibility(View.VISIBLE);
 
             String locationText = String.format("위도: %.4f, 경도: %.4f", postLatLng.latitude, postLatLng.longitude);
@@ -204,7 +204,7 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
             }
         } else {
             // '분실(islost)' 게시물이거나 위치 정보가 없으면 숨김
-            findViewById(R.id.map_view).setVisibility(View.GONE);
+            findViewById(R.id.map_container).setVisibility(View.GONE);
             lostItemLocation.setVisibility(View.GONE);
         }
 
