@@ -141,6 +141,15 @@
                                 android:layout_height="wrap_content"
                                 android:text="숭실대학교"
                                 android:visibility="gone"/>
+
+                            <androidx.fragment.app.FragmentContainerView
+                            android:id="@+id/map_view"
+                            android:name="com.google.android.gms.maps.SupportMapFragment"
+                            android:layout_width="match_parent"
+                            android:layout_height="250dp"
+                            android:layout_marginTop="8dp"
+                            android:visibility="gone"
+                            tools:visibility="visible" />
                         </LinearLayout>
                     </LinearLayout>
 

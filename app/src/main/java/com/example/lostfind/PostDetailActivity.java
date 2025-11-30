@@ -29,7 +29,15 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class PostDetailActivity extends AppCompatActivity {
+// ★★★ 지도 관련 import 추가 ★★★
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class PostDetailActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private TextView postTitleDetail, userName, postTimestamp, lostItemName, lostItemLocation, postDescription;
     private ImageView profileImage, postImageDetail;
@@ -40,6 +48,8 @@ public class PostDetailActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private String currentUserId;
     private String postId;
+    private GoogleMap mMap;
+    private LatLng postLatLng = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +79,23 @@ public class PostDetailActivity extends AppCompatActivity {
             return;
         }
 
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map_view);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
+
         loadPostData();
+    }
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mMap = googleMap;
+        mMap.getUiSettings().setAllGesturesEnabled(false); // 처음에는 지도 조작 비활성화
+
+        // 데이터 로딩 후 위치 정보(postLatLng)가 있다면 마커를 표시
+        if (postLatLng != null) {
+            updateMapLocation();
+        }
     }
 
     private void initializeViews() {
@@ -100,8 +126,13 @@ public class PostDetailActivity extends AppCompatActivity {
                     // 가져온 데이터를 Post.java 객체로 자동 변환
                     Post post = dataSnapshot.getValue(Post.class);
                     if (post != null) {
-                        populateUI(post); // UI에 데이터 채우기
-                        updateButtonVisibility(post.getAuthorId()); // 버튼 가시성 설정
+                        // ★★★ 위치 정보(위도/경도)를 전역 변수에 저장 ★★★
+                        if (post.getLatitude() != 0 && post.getLongitude() != 0) {
+                            postLatLng = new LatLng(post.getLatitude(), post.getLongitude());
+                        }
+
+                        populateUI(post); // UI 업데이트
+                        updateButtonVisibility(post.getAuthorId());
                     }
                 } else {
                     Toast.makeText(PostDetailActivity.this, "오류: 게시물이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
@@ -160,24 +191,35 @@ public class PostDetailActivity extends AppCompatActivity {
         }
 
         // '습득(isfound)' 게시물일 경우에만 위치 정보 관련 뷰들을 보여줌
-        if ("isfound".equalsIgnoreCase(post.getType())) {
-            locationTextView.setVisibility(View.VISIBLE);
+        if ("isfound".equalsIgnoreCase(post.getType()) && postLatLng != null) {
+            findViewById(R.id.map_view).setVisibility(View.VISIBLE);
             lostItemLocation.setVisibility(View.VISIBLE);
-            mapLocationTextView.setVisibility(View.VISIBLE);
-            mapContainer.setVisibility(View.VISIBLE);
-            lostItemLocation.setText(post.getLocation());
+
+            String locationText = String.format("위도: %.4f, 경도: %.4f", postLatLng.latitude, postLatLng.longitude);
+            lostItemLocation.setText(locationText);
+
+            // 지도가 이미 준비되었다면 바로 마커 표시
+            if (mMap != null) {
+                updateMapLocation();
+            }
         } else {
-            // '분실(islost)' 게시물일 경우 숨김
-            locationTextView.setVisibility(View.GONE);
+            // '분실(islost)' 게시물이거나 위치 정보가 없으면 숨김
+            findViewById(R.id.map_view).setVisibility(View.GONE);
             lostItemLocation.setVisibility(View.GONE);
-            mapLocationTextView.setVisibility(View.GONE);
-            mapContainer.setVisibility(View.GONE);
         }
 
         // Glide 라이브러리를 사용하여 이미지 로드
         if (post.getImageUrl() != null && !post.getImageUrl().isEmpty()) {
             Glide.with(this).load(post.getImageUrl()).into(postImageDetail);
         }
+    }
+    private void updateMapLocation() {
+        if (mMap == null || postLatLng == null) return;
+
+        mMap.clear(); // 기존 마커 모두 제거
+        mMap.addMarker(new MarkerOptions().position(postLatLng).title("습득 위치"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(postLatLng, 16f));
+        mMap.getUiSettings().setAllGesturesEnabled(true); // 지도 조작 활성화
     }
 
     private void updateButtonVisibility(String authorId) {
