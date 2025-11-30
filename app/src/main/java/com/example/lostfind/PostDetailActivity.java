@@ -193,6 +193,7 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         // '습득(isfound)' 게시물일 경우에만 위치 정보 관련 뷰들을 보여줌
         if ("isfound".equalsIgnoreCase(post.getType()) && postLatLng != null) {
             findViewById(R.id.map_container).setVisibility(View.VISIBLE);
+            findViewById(R.id.map_location_text_view).setVisibility(View.VISIBLE);
             lostItemLocation.setVisibility(View.VISIBLE);
 
             String locationText = String.format("위도: %.4f, 경도: %.4f", postLatLng.latitude, postLatLng.longitude);
