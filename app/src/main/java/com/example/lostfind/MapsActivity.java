@@ -120,11 +120,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (tag instanceof DataSnapshot) {
                 DataSnapshot snap = (DataSnapshot) tag;
 
+                String postId = snap.child("postId").getValue(String.class);
                 String itemName = snap.child("itemName").getValue(String.class);
                 String date = snap.child("date").getValue(String.class);
                 String imageUrl = snap.child("imageUrl").getValue(String.class);
 
-                PopupBottomSheet sheet = new PopupBottomSheet(itemName, date, imageUrl);
+                PopupBottomSheet sheet = new PopupBottomSheet(postId, itemName, date, imageUrl);
                 sheet.show(getSupportFragmentManager(), sheet.getTag());
             }
 
@@ -165,7 +166,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
 
                 try {
-                    // "lat: 37.5595, lng: 126.9691" 형태라고 가정함
                     String[] parts = locationStr.split(",");
 
                     String latStr = parts[0].replace("lat:", "").trim();
