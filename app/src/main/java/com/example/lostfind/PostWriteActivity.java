@@ -14,6 +14,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView; // ImageView import 추가
+import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ScrollView; // ScrollView를 위해 import 추가
 import android.view.MotionEvent;
@@ -26,8 +27,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide; // Glide import 추가
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage; // Firebase Storage import 추가
 import com.google.firebase.storage.StorageReference; // StorageReference import 추가
 import com.google.firebase.storage.UploadTask; // UploadTask import 추가
@@ -90,6 +94,9 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
     private GoogleMap mMap;
     private Marker currentMarker; // 현재 찍혀있는 마커를 저장할 변수
     private LatLng selectedLatLng = null;
+    // ★★★ 수정 모드 관련 변수 추가 ★★★
+    private boolean isEditMode = false;
+    private String editPostId = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +116,13 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
             return;
         }
         currentUserId = currentUser.getUid();
+
+        // ★★★ 수정 모드인지 확인하고, postId를 가져옴 ★★★
+        Intent intent = getIntent();
+        isEditMode = intent.getBooleanExtra("isEditMode", false);
+        if (isEditMode) {
+            editPostId = intent.getStringExtra("postId");
+        }
 
         // --- 뷰 초기화 ---
         initializeViews();
@@ -136,6 +150,65 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         setupClickListeners();
         // ★★★ 스크롤뷰와 투명 뷰에 터치 리스너 설정 ★★★
         setupMapTouchListener();
+        if (isEditMode && editPostId != null) {
+            // 제목을 "글 수정"으로 변경
+            TextView toolbarTitle = findViewById(R.id.toolbar_title_text); // XML에 ID가 있다면 사용
+            if(toolbarTitle != null) toolbarTitle.setText("글 수정");
+
+            loadPostForEdit();
+        }
+    }
+    private void loadPostForEdit() {
+        databaseReference.child(editPostId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Post post = dataSnapshot.getValue(Post.class);
+                    if (post != null) {
+                        // 가져온 데이터로 UI 채우기
+                        postTitleDetail.setText(post.getTitle());
+                        lostItemName.setText(post.getItemName());
+                        postDescription.setText(post.getDescription());
+
+                        // '습득' 여부 체크
+                        if ("isfound".equals(post.getType())) {
+                            checkboxIsFound.setChecked(true);
+                            // 위도, 경도 정보가 있다면 LatLng 객체로 변환하고 지도에 마커 표시
+                            if (post.getLatitude() != 0 && post.getLongitude() != 0) {
+                                selectedLatLng = new LatLng(post.getLatitude(), post.getLongitude());
+                                // EditText에 위치 정보 표시
+                                String locationText = String.format("lat: %.4f, lng: %.4f", selectedLatLng.latitude, selectedLatLng.longitude);
+                                lostItemLocation.setText(locationText);
+                                // 지도가 준비되었다면 마커를 그림
+                                if (mMap != null) {
+                                    updateMapMarker();
+                                }
+                            }
+                        }
+
+                        // 이미지 표시
+                        if (post.getImageUrl() != null && !post.getImageUrl().isEmpty()) {
+                            Glide.with(PostWriteActivity.this).load(post.getImageUrl()).into(postImageDetail);
+                            // imageUri는 null이지만, 사용자가 새 이미지를 선택하지 않으면 기존 URL을 재사용해야 함
+                        }
+                    }
+                } else {
+                    Toast.makeText(PostWriteActivity.this, "수정할 게시물을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(PostWriteActivity.this, "데이터 로딩 실패", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    private void updateMapMarker() {
+        if (mMap == null || selectedLatLng == null) return;
+        if (currentMarker != null) currentMarker.remove();
+        currentMarker = mMap.addMarker(new MarkerOptions().position(selectedLatLng).title("선택한 위치"));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLatLng, 15f));
     }
 
     private void initializeViews() {
@@ -164,6 +237,10 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(seoul, 15f));
 
         Toast.makeText(this, "습득한 위치를 지도에서 한번만 탭하세요.", Toast.LENGTH_SHORT).show();
+
+        if(isEditMode && selectedLatLng != null) {
+            updateMapMarker();
+        }
 
         // ★★★ 지도 클릭 리스너 설정 ★★★
         mMap.setOnMapClickListener(latLng -> {
@@ -208,6 +285,8 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         lostItemLocation.setFocusable(false);
     }
 
+
+
     @SuppressLint("ClickableViewAccessibility")
     private void setupMapTouchListener() {
         transparentView.setOnTouchListener((v, event) -> {
@@ -246,10 +325,17 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
 
         // ★★★ 이미지가 선택되었을 경우에만 업로드 진행 ★★★
         if (imageUri != null) {
+            // 1. 새 이미지를 선택한 경우: 항상 이미지 업로드 진행
             uploadImageAndPost(title, itemName, description, location);
+        } else if (isEditMode) {
+            // 2. 수정 모드이고, 새 이미지를 선택 안 한 경우: 기존 이미지 URL 재사용
+            databaseReference.child(editPostId).child("imageUrl").get().addOnSuccessListener(dataSnapshot -> {
+                String existingImageUrl = dataSnapshot.exists() ? dataSnapshot.getValue(String.class) : "";
+                uploadPostDetails(title, itemName, description, location, existingImageUrl);
+            });
         } else {
-            // 이미지가 없는 경우, 바로 게시물 텍스트 정보만 업로드
-            uploadPostDetails(title, itemName, description, location, ""); // 이미지 URL은 빈 문자열로 전달
+            // 3. 새 글 작성이고, 이미지를 선택 안 한 경우
+            uploadPostDetails(title, itemName, description, location, "");
         }
     }
 
@@ -276,7 +362,14 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
 
     // ★★★ 최종적으로 Realtime Database에 모든 정보를 저장하는 메서드 ★★★
     private void uploadPostDetails(String title, String itemName, String description, String location, String imageUrl) {
-        String postId = databaseReference.push().getKey();
+        String postId;
+        if (isEditMode) {
+            // 수정 모드: 기존 postId 사용
+            postId = editPostId;
+        } else {
+            // 새 글 작성 모드: 새로운 postId 생성
+            postId = databaseReference.push().getKey();
+        }
         if (postId == null) {
             Toast.makeText(this, "오류: 게시물 ID를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show();
             return;
@@ -294,23 +387,17 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
 
         databaseReference.child(postId).setValue(newPost)
                 .addOnSuccessListener(aVoid -> {
-                    //박동준이 addOnSuccessListener 내부만 바꿈
-                    if (isFound) {
+                    // ★★★ Gemini 분석 및 매칭 로직을 조건부로 실행 ★★★
+                    // 새 글이면서, 습득물이면서, 이미지가 있을 때만 AI 분석 실행
+                    if (!isEditMode && isFound && imageUri != null) {
                         analyzeFoundPostToGemini(title, itemName, location, description, imageUri, new OnResultListener() {
                             @Override
                             public void onSuccess(String res) {
                                 Log.d("Gemini", "Gemini 분석 성공: " + res);
-
                                 try {
-                                    // 1) Gemini 응답에서 JSON 텍스트만 추출
                                     JSONObject json = extractGeminiJsonOnly(res);
-
-                                    // 2) Firebase에 저장
                                     saveGeminiResultToFirebase(postId, json);
-
-                                    // 3) 🟦 매칭 알고리즘 시작
                                     startMatchingFlow(postId);
-
                                 } catch (Exception e) {
                                     Log.e("Gemini", "JSON 파싱 오류: " + e.getMessage());
                                 }
@@ -318,27 +405,22 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
                                     Toast.makeText(PostWriteActivity.this, "게시물이 등록되었습니다.", Toast.LENGTH_SHORT).show();
                                     finish();
                                 });
-
                             }
-
-
                             @Override
                             public void onError(String error) {
                                 Log.e("Gemini", "Gemini 오류: " + error);
-
                                 runOnUiThread(() -> {
                                     Toast.makeText(PostWriteActivity.this, "게시물은 등록되었으나 AI 분석이 실패했습니다.", Toast.LENGTH_SHORT).show();
                                     finish();
                                 });
                             }
                         });
-
                     } else {
-                        // islost이거나 이미지가 없으면 그냥 바로 종료
-                        Toast.makeText(PostWriteActivity.this, "게시물이 성공적으로 등록되었습니다.", Toast.LENGTH_SHORT).show();
+                        // 수정 모드이거나, 분실물이거나, 이미지가 없는 경우는 바로 종료
+                        String message = isEditMode ? "게시물이 수정되었습니다." : "게시물이 등록되었습니다.";
+                        Toast.makeText(PostWriteActivity.this, message, Toast.LENGTH_SHORT).show();
                         finish();
                     }
-                    //여기까지 박동준이 addOnSuccessListener 내부만 바꿈
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(PostWriteActivity.this, "게시물 정보 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();

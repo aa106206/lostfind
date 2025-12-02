@@ -14,6 +14,7 @@ import java.util.Map;
 
 // NonNull 어노테이션을 위해 추가
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 // 이미지 로딩을 위한 Glide 라이브러리 (build.gradle에 추가 필요)
@@ -28,6 +29,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage; // ★★★ Storage import 추가 ★★★
+import com.google.firebase.storage.StorageReference; // ★★★ StorageReference import 추가 ★★★
+
 
 // ★★★ 지도 관련 import 추가 ★★★
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -50,6 +54,8 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
     private String postId;
     private GoogleMap mMap;
     private LatLng postLatLng = null;
+
+    private Post currentPost;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +90,26 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
+
+        // ★★★ 수정 버튼에 클릭 리스너 설정 추가 ★★★
+        editButton.setOnClickListener(v -> {
+            Intent editintent = new Intent(PostDetailActivity.this, PostWriteActivity.class);
+            // 1. "수정 모드"임을 알리는 신호를 보냄
+            editintent.putExtra("isEditMode", true);
+            // 2. 어떤 게시물을 수정할지 알리기 위해 postId를 보냄
+            editintent.putExtra("postId", postId);
+            startActivity(editintent);
+        });
+
+        deleteButton.setOnClickListener(v -> {
+            // 사용자에게 정말 삭제할 것인지 한 번 더 확인
+            new AlertDialog.Builder(this)
+                    .setTitle("게시물 삭제")
+                    .setMessage("정말로 이 게시물을 삭제하시겠습니까?")
+                    .setPositiveButton("삭제", (dialog, which) -> deletePost()) // '삭제' 버튼 클릭 시 deletePost() 호출
+                    .setNegativeButton("취소", null) // '취소' 버튼 클릭 시 아무것도 안 함
+                    .show();
+        });
 
         loadPostData();
     }
@@ -124,15 +150,15 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // 가져온 데이터를 Post.java 객체로 자동 변환
-                    Post post = dataSnapshot.getValue(Post.class);
-                    if (post != null) {
+                    currentPost = dataSnapshot.getValue(Post.class);
+                    if (currentPost != null) {
                         // ★★★ 위치 정보(위도/경도)를 전역 변수에 저장 ★★★
-                        if (post.getLatitude() != 0 && post.getLongitude() != 0) {
-                            postLatLng = new LatLng(post.getLatitude(), post.getLongitude());
+                        if (currentPost.getLatitude() != 0 && currentPost.getLongitude() != 0) {
+                            postLatLng = new LatLng(currentPost.getLatitude(), currentPost.getLongitude());
                         }
 
-                        populateUI(post); // UI 업데이트
-                        updateButtonVisibility(post.getAuthorId());
+                        populateUI(currentPost); // UI 업데이트
+                        updateButtonVisibility(currentPost.getAuthorId());
                     }
                 } else {
                     Toast.makeText(PostDetailActivity.this, "오류: 게시물이 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
@@ -321,5 +347,43 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
                 Toast.makeText(PostDetailActivity.this, "데이터 접근에 실패했습니다.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    // ★★★ 게시물 삭제를 처리하는 새로운 메서드 추가 ★★★
+    private void deletePost() {
+        if (currentPost == null || postId == null) {
+            Toast.makeText(this, "삭제할 게시물 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. 게시물에 이미지 URL이 있는지 확인
+        if (currentPost.getImageUrl() != null && !currentPost.getImageUrl().isEmpty()) {
+            // 이미지가 있는 경우: Storage에서 이미지 파일 먼저 삭제
+            StorageReference imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(currentPost.getImageUrl());
+            imageRef.delete().addOnSuccessListener(aVoid -> {
+                // 이미지 삭제 성공 시, Realtime Database의 정보 삭제
+                deletePostFromDatabase();
+            }).addOnFailureListener(e -> {
+                // 이미지 삭제 실패 시 (파일이 없거나 권한 문제 등)
+                // 일단 사용자에게 알리고, DB 데이터는 삭제할지 결정할 수 있음 (여기서는 DB 데이터도 마저 삭제)
+                Toast.makeText(this, "이미지 파일 삭제 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                deletePostFromDatabase(); // 이미지 삭제는 실패했지만 DB 데이터는 삭제
+            });
+        } else {
+            // 이미지가 없는 경우: 바로 Realtime Database의 정보 삭제
+            deletePostFromDatabase();
+        }
+    }
+    // ★★★ Realtime Database에서 게시물 정보를 삭제하는 메서드 ★★★
+    private void deletePostFromDatabase() {
+        databaseReference.child(postId).removeValue()
+                .addOnSuccessListener(aVoid -> {
+                    // DB 데이터 삭제 성공
+                    Toast.makeText(PostDetailActivity.this, "게시물이 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    finish(); // 현재 상세 화면을 종료하고 이전 화면(목록)으로 돌아감
+                })
+                .addOnFailureListener(e -> {
+                    // DB 데이터 삭제 실패
+                    Toast.makeText(PostDetailActivity.this, "게시물 삭제 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
