@@ -66,22 +66,19 @@ public class PostListActivity extends AppCompatActivity {
 
     // ### loadPostData() 메서드를 Firebase에서 데이터 가져오도록 수정 ###
     private void loadPostData() {
-        // "posts" 경로의 데이터를 "timestamp" 필드를 기준으로 정렬하여 가져오는 쿼리 생성
-        // 이렇게 하면 최신순으로 데이터를 받아올 준비가 됩니다.
-        Query postsQuery = databaseReference.orderByChild("timestamp");
+        Query postsQuery = databaseReference.orderByChild("date");
 
         postsQuery.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                postList.clear(); // 기존 목록을 비워 중복 로딩 방지
+                postList.clear();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     Post post = snapshot.getValue(Post.class);
                     if (post != null) {
-                        // 최신 글이 목록의 맨 위로 오게 하려면 리스트의 0번째 인덱스에 추가
-                        postList.add(0, post);
+                        postList.add(0, post); // 최신순으로 리스트에 추가
                     }
                 }
-                adapter.notifyDataSetChanged(); // 어댑터에 데이터가 변경되었음을 알림
+                adapter.notifyDataSetChanged();
             }
 
             @Override

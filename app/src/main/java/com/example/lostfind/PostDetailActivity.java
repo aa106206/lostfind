@@ -7,8 +7,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.text.format.DateUtils;
+import java.text.SimpleDateFormat; // ★★★ SimpleDateFormat 추가 ★★★
+import java.util.Date;           // ★★★ Date 추가 ★★★
+import java.util.Locale;         // ★★★ Locale 추가 ★★★
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -199,22 +203,16 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         } else {
             userName.setText("작성자 정보 없음");
         }
-        if (post.getTimestamp() instanceof Long) {
-            long timestamp = (Long) post.getTimestamp();
-            long now = System.currentTimeMillis();
-
-            // DateUtils.getRelativeTimeSpanString() 사용
-            CharSequence relativeTime = DateUtils.getRelativeTimeSpanString(
-                    timestamp,
-                    now,
-                    DateUtils.MINUTE_IN_MILLIS, // 1분 단위까지는 "n분 전"으로 표시
-                    DateUtils.FORMAT_ABBREV_RELATIVE // "일" 대신 "일 전"과 같이 표시
-            );
-
-            postTimestamp.setText(relativeTime); // 변환된 시간으로 TextView 업데이트
+        if (post.getDate() instanceof Long) {
+            long timestamp = (Long) post.getDate();
+            Date date = new Date(timestamp);
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일 HH:mm", Locale.getDefault());
+            String formattedDate = sdf.format(date);
+            postTimestamp.setText(formattedDate);
         } else {
-            postTimestamp.setText(""); // 타임스탬프 정보가 없을 경우
+            postTimestamp.setText("");
         }
+
 
         // '습득(isfound)' 게시물일 경우에만 위치 정보 관련 뷰들을 보여줌
         if ("isfound".equalsIgnoreCase(post.getType()) && postLatLng != null) {

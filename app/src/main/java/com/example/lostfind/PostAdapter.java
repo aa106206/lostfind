@@ -42,8 +42,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         holder.postTitle.setText(post.getTitle());
         holder.postLocation.setText(post.getLocation());
 
-        if (post.getTimestamp() instanceof Long) {
-            long timestamp = (Long) post.getTimestamp();
+        if (post.getDate() instanceof Long) {
+            long timestamp = (Long) post.getDate();
             holder.postDate.setText(formatTimestamp(timestamp));
         }
 
@@ -68,7 +68,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
     private String formatTimestamp(long timestamp) {
         Date date = new Date(timestamp);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd", Locale.getDefault());
+        // "yyyy.MM.dd" -> "yyyy.MM.dd HH:mm" 으로 변경
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault());
         return sdf.format(date);
     }
 

@@ -11,7 +11,7 @@ public class Post {
     private String imageUrl;
     private String authorId;
     private String type; // "isLost" 또는 "isFound"
-    private Object timestamp;
+    private Object date;
 
     private double latitude;
     private double longitude;
@@ -28,7 +28,7 @@ public class Post {
         this.imageUrl = imageUrl;
         this.authorId = authorId;
         this.type = type;
-        this.timestamp = ServerValue.TIMESTAMP;
+        this.date = ServerValue.TIMESTAMP; // ★★★ date 필드에 서버 시간 할당 ★★★
     }
 
     public String getPostId() { return postId; }
@@ -39,7 +39,7 @@ public class Post {
     public String getImageUrl() { return imageUrl; }
     public String getAuthorId() { return authorId; }
     public String getType() { return type; }
-    public Object getTimestamp() { return timestamp; }
+    public Object getDate() { return date; }
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
     public void setLatitude(double latitude) { this.latitude = latitude; }
