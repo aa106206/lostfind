@@ -87,6 +87,16 @@
                             android:layout_toEndOf="@id/profile_image"
                             android:text="2024년 10월 11일 오전 11:15"
                             android:textSize="12sp" />
+
+                        <ImageButton
+                            android:id="@+id/bookmark_button"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/outline_add_notes"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:contentDescription="북마크" />
                     </RelativeLayout>
 
                     <TextView
