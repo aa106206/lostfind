@@ -22,7 +22,7 @@
             android:scaleType="centerCrop"
             android:src="@drawable/left_arrow"
             android:contentDescription="backButton"
-            />
+            android:background="?selectableItemBackgroundBorderless" />
 
         <TextView
             android:layout_width="wrap_content"

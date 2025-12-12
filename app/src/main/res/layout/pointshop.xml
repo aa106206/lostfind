@@ -26,7 +26,8 @@
         android:contentDescription="뒤로 가기"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="?selectableItemBackgroundBorderless"/>
 
     <TextView
         android:id="@+id/tv_title"

@@ -22,7 +22,8 @@
             android:layout_height="50dp"
             android:scaleType="centerCrop"
             android:src="@drawable/left_arrow"
-            android:contentDescription="Back" />
+            android:contentDescription="Back"
+            android:background="?selectableItemBackgroundBorderless"/>
 
         <TextView
             android:id="@+id/txtTitle"
