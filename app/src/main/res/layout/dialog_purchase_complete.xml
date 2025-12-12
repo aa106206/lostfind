@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp"
+    android:background="@drawable/dialog_background"> <!--둥근 모서리 배경 (아래에서 생성)-->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="구매 완료!"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:layout_marginBottom="16dp"/>
+
+    <ImageView
+        android:id="@+id/iv_purchased_item"
+        android:layout_width="250dp"
+        android:layout_height="250dp"
+        android:scaleType="fitCenter"
+        android:src="@drawable/gift1" /> <!-- 예시 이미지 -->
+
+    <TextView
+        android:id="@+id/tv_purchased_item_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="문화상품권 5천원권"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <!-- 이미지 저장 버튼 -->
+        <Button
+            android:id="@+id/btn_dialog_save_image"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="이미지 저장"
+            android:backgroundTint="#888888"
+            app:cornerRadius="8dp"
+            android:layout_marginEnd="8dp"/>
+
+        <!-- 확인(닫기) 버튼 -->
+        <Button
+            android:id="@+id/btn_dialog_close"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="확인"
+            android:backgroundTint="@color/lightBlue"
+            app:cornerRadius="8dp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+</LinearLayout>

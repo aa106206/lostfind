@@ -3,6 +3,7 @@ package com.example.lostfind;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,9 +23,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.util.Log;
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -39,6 +43,8 @@ public class ChatActivity extends AppCompatActivity {
     private String currentUserName = "Anonymous"; // 내 이름
     private String chatRoomId; // 현재 채팅방 ID
     private String opponentUserName; // 상대방 이름
+    private TextView chatUserName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,10 @@ public class ChatActivity extends AppCompatActivity {
         // --- Intent로부터 데이터 받기 ---
         chatRoomId = getIntent().getStringExtra("chatRoomId");
         opponentUserName = getIntent().getStringExtra("opponentUserName");
+
+
+        chatUserName = findViewById(R.id.chat_user_name);
+        chatUserName.setText(opponentUserName);
 
         if (chatRoomId == null || chatRoomId.isEmpty()) {
             Toast.makeText(this, "채팅방 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -76,6 +86,11 @@ public class ChatActivity extends AppCompatActivity {
 
         // --- 내 이름 가져오기 및 채팅 시작 ---
         fetchMyUserNameAndStartChat();
+
+        findViewById(R.id.btn_reward).setOnClickListener(v -> {
+            giveRewardToOpponent();
+        });
+
     }
 
     private void initializeViews() {
@@ -176,4 +191,72 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void giveRewardToOpponent() {
+        if (chatRoomId == null || currentUser == null) {
+            Toast.makeText(this, "보상 정보를 처리할 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 1. chatRoomId에서 상대방의 UID를 추출합니다.
+        // chatRoomId는 두 UID를 밑줄(_)로 연결한 형태 (예: uid1_uid2)
+        String myUid = currentUser.getUid();
+        String[] uids = chatRoomId.split("_");
+        String opponentUid = null;
+
+        if (uids.length == 2) {
+            if (uids[0].equals(myUid)) {
+                opponentUid = uids[1];
+            } else {
+                opponentUid = uids[0];
+            }
+        }
+
+        if (opponentUid == null) {
+            Toast.makeText(this, "상대방 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 2. Firebase 'users' 경로에서 상대방의 데이터 참조를 가져옵니다.
+        DatabaseReference opponentUserRef = FirebaseDatabase.getInstance().getReference("users").child(opponentUid);
+
+        // 3. 트랜잭션을 사용하여 안전하게 포인트를 100 증가시킵니다.
+        // 트랜잭션은 여러 사용자가 동시에 포인트를 변경하려고 할 때 데이터 충돌을 방지합니다.
+        opponentUserRef.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                // 현재 포인트를 가져옵니다.
+                Long currentPoint = mutableData.child("point").getValue(Long.class);
+
+                if (currentPoint == null) {
+                    // 'point' 필드가 없다면 100으로 새로 생성합니다.
+                    currentPoint = 100L;
+                } else {
+                    // 기존 포인트에 100을 더합니다.
+                    currentPoint += 100;
+                }
+
+                // 변경된 포인트 값을 데이터베이스에 다시 설정합니다.
+                mutableData.child("point").setValue(currentPoint);
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError error, boolean committed, @Nullable DataSnapshot currentData) {
+                if (committed) {
+                    // 트랜잭션이 성공적으로 완료되었을 때
+                    Toast.makeText(ChatActivity.this, opponentUserName + "님에게 100 포인트를 지급했습니다!", Toast.LENGTH_LONG).show();
+                    // 보상 버튼을 비활성화하여 중복 지급을 방지합니다.
+                    findViewById(R.id.btn_reward).setEnabled(false);
+                    findViewById(R.id.btn_reward).setAlpha(0.5f); // 버튼을 반투명하게 만들어 비활성화 상태를 시각적으로 표시
+                } else {
+                    // 트랜잭션 실패 시
+                    Toast.makeText(ChatActivity.this, "포인트 지급에 실패했습니다. 다시 시도해주세요.", Toast.LENGTH_SHORT).show();
+                    Log.e("ChatActivity", "포인트 지급 트랜잭션 실패: ", error != null ? error.toException() : null);
+                }
+            }
+        });
+    }
+
 }

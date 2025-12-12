@@ -65,22 +65,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
 
         naviBinding.goPostlist.setOnClickListener(v -> {
-            Intent intent = new Intent(this, PostListActivity.class);
+            Intent intent = new Intent(MapsActivity.this, PostListActivity.class);
             startActivity(intent);
         });
 
         naviBinding.goChat.setOnClickListener(v -> {
-            Intent intent = new Intent(this, ChatRoomListActivity.class);
+            Intent intent = new Intent(MapsActivity.this, ChatRoomListActivity.class);
             startActivity(intent);
         });
 
         naviBinding.goMypost.setOnClickListener(v -> {
-            Intent intent = new Intent(this, MyPostsActivity.class);
+            Intent intent = new Intent(MapsActivity.this, MyPostsActivity.class);
             startActivity(intent);
         });
 
         naviBinding.goMyinfo.setOnClickListener(v -> {
-            Intent intent = new Intent(this, InfoActivity.class);
+            Intent intent = new Intent(MapsActivity.this, InfoActivity.class);
             startActivity(intent);
         });
 
@@ -130,13 +130,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (tag instanceof DataSnapshot) {
                 DataSnapshot snap = (DataSnapshot) tag;
 
-                String postId = snap.child("postId").getValue(String.class);
+                String postId = snap.getKey();
+                if (postId == null) {
+                    Log.e("MapsActivity", "Post ID가 null입니다.");
+                    return true; // postId가 없으면 더 이상 진행하지 않음
+                }
+
+                // 2. 나머지 데이터들을 올바른 타입으로 가져옵니다.
+                String authorId = snap.child("authorId").getValue(String.class);
                 String itemName = snap.child("itemName").getValue(String.class);
-                String date = snap.child("date").getValue(String.class);
                 String imageUrl = snap.child("imageUrl").getValue(String.class);
 
-                PopupBottomSheet sheet = new PopupBottomSheet(postId, itemName, date, imageUrl);
+                // 3. 날짜(date)는 Long 타입으로 가져와서 String으로 변환합니다.
+                Object dateValue = snap.child("date").getValue();
+                String dateString = ""; // 기본값은 빈 문자열
+                if (dateValue instanceof Long) {
+                    // SimpleDateFormat을 사용하여 원하는 형식의 문자열로 변환
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy.MM.dd", java.util.Locale.KOREA);
+                    dateString = sdf.format(new java.util.Date((Long) dateValue));
+                }
+
+                // 4. 생성자에 올바른 데이터를 전달합니다.
+                PopupBottomSheet sheet = new PopupBottomSheet(postId, authorId, itemName, dateString, imageUrl);
                 sheet.show(getSupportFragmentManager(), sheet.getTag());
+
             }
 
             return true; // 기본 동작(카메라 이동) 막기

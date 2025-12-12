@@ -83,7 +83,7 @@
                 android:id="@+id/tv_current_point"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="12,500 P"
+                android:text="0p"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"

@@ -40,6 +40,17 @@
             android:scaleType="fitCenter"
             android:src="@drawable/left_arrow" />
 
+        <ImageButton
+            android:id="@+id/btn_reward"
+            android:layout_width="60dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:padding="12dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/reward" />
+
     </RelativeLayout>
 
 
