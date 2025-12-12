@@ -7,6 +7,8 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
+
 import java.text.SimpleDateFormat; // ★★★ SimpleDateFormat 추가 ★★★
 import java.util.Date;           // ★★★ Date 추가 ★★★
 import java.util.Locale;         // ★★★ Locale 추가 ★★★
@@ -51,6 +53,9 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
     private ImageView profileImage, postImageDetail;
     private View locationTextView, mapLocationTextView, mapContainer;
     private Button editButton, deleteButton, sendMessageButton, back_button;
+    private ToggleButton bookmarkButton;
+    private DatabaseReference bookmarkRef;
+    private boolean isBookmarked = false;
 
     private DatabaseReference databaseReference;
     private FirebaseAuth mAuth;
@@ -66,10 +71,31 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.post_detail);
 
+        bookmarkButton = findViewById(R.id.bookmark_button); // 이 라인은 그대로 둡니다.
+
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             currentUserId = currentUser.getUid();
+        } else {
+            // 로그인 안 된 사용자는 북마크 기능 사용 불가
+            bookmarkButton.setVisibility(View.GONE);
+        }
+
+        Intent intent = getIntent();
+        postId = intent.getStringExtra("POST_ID");
+
+        if (postId == null || postId.isEmpty()) {
+            Toast.makeText(this, "오류: 게시물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        // 북마크 관련 로직 추가
+        if (currentUserId != null) {
+            bookmarkRef = FirebaseDatabase.getInstance().getReference("bookmarks").child(currentUserId);
+            checkBookmarkStatus(); // 북마크 상태 확인
+            bookmarkButton.setOnClickListener(v -> toggleBookmark()); // 버튼 클릭 리스너 설정
         }
 
         databaseReference = FirebaseDatabase.getInstance().getReference("posts");
@@ -79,15 +105,6 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
         back_button.setOnClickListener(v -> {
             onBackPressed();
         });
-
-        Intent intent = getIntent();
-        postId = intent.getStringExtra("POST_ID");
-
-        if (postId == null || postId.isEmpty()) {
-            Toast.makeText(this, "오류: 게시물 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
-            finish(); // 에러 발생 시 액티비티 종료
-            return;
-        }
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_container);
@@ -383,5 +400,53 @@ public class PostDetailActivity extends AppCompatActivity implements OnMapReadyC
                     // DB 데이터 삭제 실패
                     Toast.makeText(PostDetailActivity.this, "게시물 삭제 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    /**
+     * 현재 게시물의 북마크 상태를 Firebase에서 확인하고 버튼 UI를 업데이트하는 메소드
+     */
+    private void checkBookmarkStatus() {
+        if (bookmarkRef != null && postId != null) {
+            bookmarkRef.child(postId).addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    isBookmarked = snapshot.exists(); // 데이터 존재 여부로 북마크 상태 판단
+                    bookmarkButton.setChecked(isBookmarked); // ToggleButton의 체크 상태 업데이트
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Toast.makeText(PostDetailActivity.this, "북마크 정보를 확인하지 못했습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+    }
+
+    /**
+     * 북마크 버튼을 눌렀을 때 상태를 변경하고 Firebase 데이터를 업데이트하는 메소드
+     */
+    private void toggleBookmark() {
+        if (bookmarkRef == null || postId == null) return;
+
+        isBookmarked = !isBookmarked; // 현재 상태를 반전시킵니다.
+
+        if (isBookmarked) {
+            // 북마크 추가
+            bookmarkRef.child(postId).setValue(true).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(PostDetailActivity.this, "북마크에 추가되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+                // UI는 isBookmarked 값에 따라 이미 변경되었으므로 여기서 다시 바꿀 필요 없음
+            });
+        } else {
+            // 북마크 제거
+            bookmarkRef.child(postId).removeValue().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Toast.makeText(PostDetailActivity.this, "북마크에서 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        // 클릭과 동시에 버튼 상태 즉시 업데이트
+        bookmarkButton.setChecked(isBookmarked);
     }
 }

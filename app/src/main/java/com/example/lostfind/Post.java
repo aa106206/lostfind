@@ -31,6 +31,7 @@ public class Post {
         this.date = ServerValue.TIMESTAMP; // ★★★ date 필드에 서버 시간 할당 ★★★
     }
 
+    public void setPostId(String postId) { this.postId = postId; }
     public String getPostId() { return postId; }
     public String getTitle() { return title; }
     public String getItemName() { return itemName; }

@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F8F8">
+    tools:context=".BookmarkActivity">
 
-    <!-- 상단 툴바 -->
+    <!-- 1. 상단 툴바 -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/toolbar"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@android:color/white"
         android:elevation="4dp"
@@ -46,35 +45,28 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-    <!-- RecyclerView(실제 목록 표시 부분) -->
+    <!-- 2. 북마크 목록 (툴바 아래에 위치) -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_bookmark"
+        android:id="@+id/bookmark_recyclerview"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        />
+        tools:listitem="@layout/list_item_post" />
 
-
-    <!-- 빈 화면 표시 -->
+    <!-- 3. 빈 목록 안내 텍스트 (화면 중앙) -->
     <TextView
-        android:id="@+id/tv_empty"
+        android:id="@+id/empty_bookmark_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="북마크된 게시글이 없습니다."
-        android:textSize="15sp"
-        android:textColor="#666666"
+        android:text="북마크된 게시물이 없습니다."
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
