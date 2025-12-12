@@ -32,6 +32,10 @@ public class PostListActivity extends AppCompatActivity {
     private List<Post> allPostList; // ★★★ 1. 전체 게시물을 담을 원본 리스트 ★★★
     private List<Post> filteredPostList; // ★★★ 2. 필터링된 결과를 담을 리스트 ★★★
     private EditText searchEditText; // ★★★ 3. 검색창 변수 추가 ★★★
+    private TabLayout tabLayout; // ★★★ TabLayout 변수 추가 ★★★
+
+    // ★★★ 현재 선택된 탭을 저장할 변수 추가 (기본값: isfound) ★★★
+    private String selectedTabType = "isfound";
 
 
     // ### Firebase 데이터베이스 참조 변수 선언 ###
@@ -47,7 +51,7 @@ public class PostListActivity extends AppCompatActivity {
 
         Button backButton = findViewById(R.id.back_button);
         Button writePostButton = findViewById(R.id.write_post_button);
-        TabLayout tabLayout = findViewById(R.id.tab_layout);
+        tabLayout = findViewById(R.id.tab_layout); // TabLayout 연결
         searchEditText = findViewById(R.id.search_edit_text);
 
         backButton.setOnClickListener(v -> {
@@ -66,6 +70,26 @@ public class PostListActivity extends AppCompatActivity {
 
         adapter = new PostAdapter(this, filteredPostList);
         recyclerView.setAdapter(adapter);
+
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                // 선택된 탭의 위치(position)에 따라 selectedTabType 값 변경
+                if (tab.getPosition() == 0) {
+                    selectedTabType = "isfound"; // 첫 번째 탭: 찾은 게시판
+                } else {
+                    selectedTabType = "islost";  // 두 번째 탭: 찾는 게시판
+                }
+                // 탭이 변경되었으므로, 현재 검색어 기준으로 다시 필터링
+                filter(searchEditText.getText().toString());
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) { }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) { }
+        });
 
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -117,21 +141,28 @@ public class PostListActivity extends AppCompatActivity {
 
     // ★★★ 필터링을 수행하는 새로운 메서드 ★★★
     private void filter(String searchText) {
-        filteredPostList.clear(); // 필터링된 리스트를 일단 비움
+        filteredPostList.clear();
 
-        if (searchText.isEmpty()) {
-            // 검색어가 비어있으면, 원본 리스트 전체를 보여줌
-            filteredPostList.addAll(allPostList);
-        } else {
-            // 검색어가 있으면, 원본 리스트(allPostList)에서 조건에 맞는 것만 골라냄
-            for (Post post : allPostList) {
-                // 게시물 제목(post.getTitle())에 검색어(searchText)가 포함되어 있는지 확인 (대소문자 무시)
-                if (post.getTitle().toLowerCase().contains(searchText.toLowerCase())) {
-                    filteredPostList.add(post); // 조건에 맞으면 필터링된 리스트에 추가
-                }
+        // 1. 전체 원본 목록(allPostList)에서 반복
+        for (Post post : allPostList) {
+            // 2. 탭 조건 확인: 현재 선택된 탭(selectedTabType)과 게시물의 타입(post.getType())이 일치하는가?
+            boolean isTabMatch = selectedTabType.equals(post.getType());
+
+            // 3. 검색어 조건 확인
+            boolean isSearchMatch;
+            if (searchText.isEmpty()) {
+                isSearchMatch = true; // 검색어가 없으면 항상 참
+            } else {
+                // 제목에 검색어가 포함되어 있는가? (대소문자 무시)
+                isSearchMatch = post.getTitle().toLowerCase().contains(searchText.toLowerCase());
+            }
+
+            // 4. 두 조건이 모두 참(true)일 때만 필터링된 리스트에 추가
+            if (isTabMatch && isSearchMatch) {
+                filteredPostList.add(post);
             }
         }
-        // 어댑터에 데이터가 변경되었음을 알려 화면을 새로고침
+        // 어댑터에 데이터 변경 알림
         adapter.notifyDataSetChanged();
     }
 }
