@@ -5,14 +5,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F5F5"
+    android:background="@color/one"
     android:id="@+id/main">
 
     <androidx.constraintlayout.widget.ConstraintLayout
     android:id="@+id/toolbar"
     android:layout_width="0dp"
     android:layout_height="?attr/actionBarSize"
-    android:background="@android:color/white"
+    android:background="@color/two"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintEnd_toEndOf="parent">

@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="@color/one"
     tools:context=".ChatActivity">
 
     <!-- 상단 툴바 레이아웃 -->
@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_alignParentTop="true"
-        android:background="@color/white"
+        android:background="@color/two"
         android:elevation="4dp">  <!-- 툴바에 그림자 효과 추가 -->
 
         <!-- 채팅 상대방 이름 TextView: 화면 중앙 정렬 -->
@@ -79,7 +79,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="메시지를 입력하세요"
+            android:hint="  메시지를 입력하세요"
             android:inputType="text"
             android:background="@drawable/edittext_background"
             android.padding="12dp"
@@ -92,7 +92,7 @@
             android:text="전송"
             android:textColor="@color/white"
             android:textStyle="bold"
-            android:backgroundTint="@color/lightBlue"
+            android:backgroundTint="@color/two"
             android:layout_marginLeft="8dp"
             app:cornerRadius="10dp"/>
 

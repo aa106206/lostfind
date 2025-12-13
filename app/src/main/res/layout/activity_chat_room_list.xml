@@ -5,12 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ChatRoomListActivity">
+    tools:context=".ChatRoomListActivity"
+    android:background="@color/one">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:background="@color/white">
+        android:background="@color/two">
 
         <!-- 제목 TextView: 화면 중앙 정렬 -->
         <TextView

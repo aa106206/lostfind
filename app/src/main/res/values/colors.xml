@@ -7,4 +7,7 @@
     <color name="darkBlue">#006D92</color>
     <color name="mediumBlue">#02A5C8</color>
     <color name="lightBlue">#61C4C2</color>
+    <color name="one">#EEF1FB</color>
+    <color name="two">#96AFFB</color>
+
 </resources>
