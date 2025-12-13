@@ -367,11 +367,9 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         if (isEditMode) {
             // 수정 모드: 기존 postId 사용
             postId = editPostId;
-            Log.d("Gemini", "수정하고 있어요1");
         } else {
             // 새 글 작성 모드: 새로운 postId 생성
             postId = databaseReference.push().getKey();
-            Log.d("Gemini", "수정하고 있어요2");
         }
         if (postId == null) {
             Toast.makeText(this, "오류: 게시물 ID를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -381,27 +379,22 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         boolean isFound = checkboxIsFound.isChecked();
         String type = isFound ? "isfound" : "islost";
 
-        Log.d("Gemini", "수정하고 있어요2.1");
         Post newPost = new Post(postId, title, itemName, location, description, imageUrl, currentUserId, type);
-//        Log.d("Gemini", newPost.toString());
-        Log.d("Gemini", "수정하고 있어요2.2");
+//
         if (isFound && selectedLatLng != null) {
             newPost.setLatitude(selectedLatLng.latitude);
             newPost.setLongitude(selectedLatLng.longitude);
         }
-        Log.d("Gemini", "수정하고 있어요2.3");
-        Log.d("Gemini", postId);
 
         databaseReference.child(postId)
                 .setValue(newPost)
                 .addOnCompleteListener(task -> {
 
-                    Log.d("Gemini", "🟡 setValue onComplete 호출됨");
+                    Log.d("Gemini", "setValue onComplete 호출됨");
 
                     if (!task.isSuccessful()) {
-                        // ❌ Firebase 저장 실패
                         Exception e = task.getException();
-                        Log.e("Gemini", "❌ 게시물 저장 실패", e);
+                        Log.e("Gemini", "게시물 저장 실패", e);
 
                         Toast.makeText(
                                 PostWriteActivity.this,
@@ -410,9 +403,6 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
                         ).show();
                         return;
                     }
-
-                    // ✅ Firebase 저장 성공
-                    Log.d("Gemini", "✅ 수정하고 있어요2.4 (Firebase 저장 성공)");
 
                     // ★★★ Gemini 분석 및 매칭 로직 (조건부) ★★★
                     if (!isEditMode && isFound && imageUri != null) {
@@ -481,62 +471,8 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
                         finish();
                     }
                 });
-
-
-
-//        databaseReference.child(postId).setValue(newPost)
-//                .addOnSuccessListener(aVoid -> {
-//                    Log.d("Gemini", "수정하고 있어요2.4");
-//                    // ★★★ Gemini 분석 및 매칭 로직을 조건부로 실행 ★★★
-//                    // 새 글이면서, 습득물이면서, 이미지가 있을 때만 AI 분석 실행
-//                    if (!isEditMode && isFound && imageUri != null) {
-//                        Log.d("Gemini", "수정하고 있어요3");
-//                        analyzeFoundPostToGemini(title, itemName, location, description, imageUri, new OnResultListener() {
-//                            @Override
-//                            public void onSuccess(String res) {
-//                                Log.d("Gemini", "수정하고 있어요4");
-//                                Log.d("Gemini", "Gemini 분석 성공: " + res);
-//                                try {
-//                                    JSONObject json = extractGeminiJsonOnly(res);
-//                                    saveGeminiResultToFirebase(postId, json);
-//                                    startMatchingFlow(postId);
-//                                } catch (Exception e) {
-//                                    Log.e("Gemini", "JSON 파싱 오류: " + e.getMessage());
-//                                }
-//                                runOnUiThread(() -> {
-//                                    Toast.makeText(PostWriteActivity.this, "게시물이 등록되었습니다.", Toast.LENGTH_SHORT).show();
-//                                    finish();
-//                                });
-//                            }
-//                            @Override
-//                            public void onError(String error) {
-//                                Log.e("Gemini", "Gemini 오류: " + error);
-//                                runOnUiThread(() -> {
-//                                    Log.d("Gemini", "수정하고 있어요5");
-//                                    Toast.makeText(PostWriteActivity.this, "게시물은 등록되었으나 AI 분석이 실패했습니다.", Toast.LENGTH_SHORT).show();
-//                                    finish();
-//                                });
-//                            }
-//                        });
-//                    } else {
-//                        // 수정 모드이거나, 분실물이거나, 이미지가 없는 경우는 바로 종료
-//                        Log.d("Gemini", "수정하고 있어요6");
-//                        String message = isEditMode ? "게시물이 수정되었습니다." : "게시물이 등록되었습니다.";
-//                        Toast.makeText(PostWriteActivity.this, message, Toast.LENGTH_SHORT).show();
-//                        finish();
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    Log.d("Gemini","수정하고 있어요7");
-//                    Toast.makeText(PostWriteActivity.this, "게시물 정보 업로드 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-//                });
-
-
-
     }
 
-
-    //analyzeFoundPostToGemini는 박동준이 Gemini 테스트 하려고 넣은 함수임
     private void analyzeFoundPostToGemini(String title, String itemName, String location,String description, Uri imageUri, OnResultListener listener) {
 //        String apiKey = BuildConfig.GEMINI_API_KEY;
         String apiKey="AIzaSyCQvTfmmo_dZXngI5yYG8otAVO3_4KYuTM";
@@ -702,7 +638,7 @@ private JSONObject extractGeminiJsonOnly(String res) throws Exception {
 
                 Log.d("Match", "매칭 결과: " + matches.toString());
 
-                // TODO: FCM 알림은 여기서 호출 예정
+                // FCM 알림은 여기서 호출 예정
                 try {
                     for (int i = 0; i < matches.length(); i++) {
                         JSONObject obj = matches.getJSONObject(i);
@@ -710,19 +646,12 @@ private JSONObject extractGeminiJsonOnly(String res) throws Exception {
                         String matchedPostId = obj.getString("lostPostId");  // ✔ 추출 완료
                         Log.d("Match", "매칭된 postId = " + matchedPostId);
 
-                        // 🔥 매칭된 게시글의 작성자에게 알림 보내기
+                        // 매칭된 게시글의 작성자에게 알림 보내기
                         notifyMatchedUser(matchedPostId);
                     }
                 } catch (Exception e) {
                     Log.e("Match", "매칭 처리 오류: " + e.getMessage());
                 }
-
-
-
-//                runOnUiThread(() ->
-//                        Toast.makeText(PostWriteActivity.this,
-//                                "AI 매칭 완료: " + matches.length() + "개 발견", Toast.LENGTH_SHORT).show()
-//                );
             }
 
             @Override

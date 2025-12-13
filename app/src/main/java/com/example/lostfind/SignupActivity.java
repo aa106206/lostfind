@@ -16,6 +16,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class SignupActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
@@ -79,12 +80,29 @@ public class SignupActivity extends AppCompatActivity {
                                         FirebaseDatabase.getInstance().getReference("users")
                                                 .child(uid)
                                                 .setValue(user)
+//                                                .addOnSuccessListener(aVoid -> {
+//                                                    // 4. 사용자에게 안내 후 시작 화면으로 이동
+//                                                    Toast.makeText(this, "회원가입 성공! 인증 메일을 확인해주세요.", Toast.LENGTH_LONG).show();
+//                                                    startActivity(new Intent(this, StartActivity.class));
+//                                                    finish();
+//                                                })
                                                 .addOnSuccessListener(aVoid -> {
-                                                    // 4. 사용자에게 안내 후 시작 화면으로 이동
+
+                                                    // ✅ FCM 토큰 저장
+                                                    FirebaseMessaging.getInstance().getToken()
+                                                            .addOnSuccessListener(token -> {
+                                                                FirebaseDatabase.getInstance()
+                                                                        .getReference("users")
+                                                                        .child(uid)
+                                                                        .child("fcmToken")
+                                                                        .setValue(token);
+                                                            });
+
                                                     Toast.makeText(this, "회원가입 성공! 인증 메일을 확인해주세요.", Toast.LENGTH_LONG).show();
                                                     startActivity(new Intent(this, StartActivity.class));
                                                     finish();
                                                 })
+
                                                 .addOnFailureListener(e ->
                                                         Toast.makeText(this, "회원 DB 저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show()
                                                 );
