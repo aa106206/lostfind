@@ -25,7 +25,7 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:text="분실물 찾기"
+        android:text="찾아Dream"
         android:textSize="40sp"
         android:textStyle="bold"
         />

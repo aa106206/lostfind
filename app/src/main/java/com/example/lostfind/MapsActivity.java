@@ -1,11 +1,19 @@
 package com.example.lostfind;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentActivity;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Shader;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -15,6 +23,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -159,8 +169,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(library, 17));
 
 //        mMap.addMarker(new MarkerOptions().position(soongsil).title("분실물보관소[정보과학관]"));
-        mMap.addMarker(new MarkerOptions().position(studentHall).title("분실물보관소[학생회관406호]"));
-        mMap.addMarker(new MarkerOptions().position(library).title("분실문보관소[도서관1층]"));
+        mMap.addMarker(new MarkerOptions()
+                .position(studentHall).
+                title("분실물보관소[학생회관406호]")
+                .icon(createCircleMarker(R.drawable.studenthall, 40)));
+        mMap.addMarker(new MarkerOptions()
+                .position(library)
+                .title("분실문보관소[도서관1층]")
+                .icon(createCircleMarker(R.drawable.library, 40)));
 
         //습득 게시물 마커 표시
         loadFoundPostsAndShowMarkers();
@@ -273,71 +289,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         };
 
-        // 🔥 이제부터 posts 밑에 무슨 변화가 생기면 onDataChange가 자동 호출됨
         postsRef.addValueEventListener(postsListener);
     }
 
-
-//    private void loadFoundPostsAndShowMarkers() {
-//
-//        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("posts");
-//
-//        ref.get().addOnSuccessListener(snapshot -> {
-//
-//            for (DataSnapshot postSnap : snapshot.getChildren()) {
-//
-//                // 1) type이 isfound인 게시물만 지도에 표시
-//                String type = postSnap.child("type").getValue(String.class);
-//                if (type == null || !type.equals("isfound")) continue;
-//
-//                // 2) 제목 (popup용)
-//                String title = postSnap.child("itemName").getValue(String.class);
-//
-//                // 3) 날짜 (popup용)
-//                String date = postSnap.child("date").getValue(String.class);
-//
-//                // 4) 이미지 URL (popup 용 — Storage URL)
-//                String imageUrl = postSnap.child("imageUrl").getValue(String.class);
-//
-//                // 5) location 문자열 가져오기
-//                String locationStr = postSnap.child("location").getValue(String.class);
-//
-//                if (locationStr == null || !locationStr.contains("lat")) {
-//                    Log.e("Maps", "위치 문자열 없음: " + postSnap.getKey());
-//                    continue;
-//                }
-//
-//                try {
-//                    String[] parts = locationStr.split(",");
-//
-//                    String latStr = parts[0].replace("lat:", "").trim();
-//                    String lngStr = parts[1].replace("lng:", "").trim();
-//
-//                    double lat = Double.parseDouble(latStr);
-//                    double lng = Double.parseDouble(lngStr);
-//
-//                    LatLng foundLoc = new LatLng(lat, lng);
-//
-//                    // 6) 지도에 마커 추가
-//                    Marker marker = mMap.addMarker(new MarkerOptions()
-//                            .position(foundLoc)
-//                            .title(title)
-//                    );
-//
-//                    // 7) 마커에 Firebase 데이터 저장 (BottomSheet에서 사용)
-//                    marker.setTag(postSnap);
-//
-//                    Log.d("Maps", "분실물 위치 표시 완료: " + lat + ", " + lng);
-//
-//                } catch (Exception e) {
-//                    Log.e("Maps", "위치 파싱 실패: " + locationStr);
-//                }
-//            }
-//
-//        }).addOnFailureListener(e -> {
-//            Log.e("Maps", "Firebase 불러오기 실패: " + e.getMessage());
-//        });
-//    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -345,5 +299,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             postsRef.removeEventListener(postsListener);
         }
     }
+
+
+
+    //실험실
+    private BitmapDescriptor createCircleMarker(int drawableResId, int sizeDp) {
+        Drawable drawable = ContextCompat.getDrawable(this, drawableResId);
+        if (drawable == null) return null;
+
+        float density = getResources().getDisplayMetrics().density;
+        int sizePx = (int) (sizeDp * density);
+        float radius = sizePx / 2f;
+
+        // 1️⃣ Drawable → Bitmap
+        Bitmap srcBitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        Canvas srcCanvas = new Canvas(srcBitmap);
+        drawable.setBounds(0, 0, sizePx, sizePx);
+        drawable.draw(srcCanvas);
+
+        // 2️⃣ 원형 Bitmap
+        Bitmap output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        // 🔹 이미지 원형 채우기
+        Paint imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        imagePaint.setShader(new BitmapShader(srcBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+        canvas.drawCircle(radius, radius, radius, imagePaint);
+
+        // 🔹 흰색 테두리
+        Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        strokePaint.setStyle(Paint.Style.STROKE);
+        strokePaint.setColor(Color.BLACK);
+        strokePaint.setStrokeWidth(4f);
+        canvas.drawCircle(radius, radius, radius - 2f, strokePaint);
+
+        return BitmapDescriptorFactory.fromBitmap(output);
+    }
+
+
+
 
 }
