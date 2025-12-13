@@ -183,7 +183,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     if (type == null || !type.equals("isfound")) continue;
 
                     String title = postSnap.child("itemName").getValue(String.class);
-                    String date = postSnap.child("date").getValue(String.class);
+//                    String date = postSnap.child("date").getValue(String.class);
+                    Long date = snapshot.child("date").getValue(Long.class);
+
                     String imageUrl = postSnap.child("imageUrl").getValue(String.class);
 
                     String locationStr = postSnap.child("location").getValue(String.class);

@@ -62,6 +62,7 @@ dependencies {
 
     implementation("com.firebaseui:firebase-ui-auth:9.0.0")
     implementation(platform("com.google.firebase:firebase-bom:34.5.0"))
+//    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
