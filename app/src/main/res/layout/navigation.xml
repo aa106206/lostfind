@@ -58,8 +58,8 @@
             android:layout_height="100dp"
             android:padding="20dp">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginTop="13dp"
                 android:src="@drawable/in_navi1"
                 android:layout_marginEnd="16dp" />
@@ -96,8 +96,8 @@
             android:layout_height="100dp"
             android:padding="20dp">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginTop="13dp"
                 android:src="@drawable/chat"
                 android:layout_marginEnd="16dp" />
@@ -133,8 +133,8 @@
             android:layout_height="wrap_content"
             android:padding="20dp">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginTop="13dp"
                 android:src="@drawable/user"
                 android:layout_marginEnd="16dp" />
@@ -163,7 +163,7 @@
                     android:layout_marginBottom="10dp"
                     android:layout_marginTop="10dp">
                     <ImageView
-                        android:layout_width="24dp"
+                        android:layout_width="13dp"
                         android:layout_height="24dp"
                         android:src="@drawable/in_navi6"
                         android:layout_marginRight="10dp"/>
@@ -180,7 +180,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
                     <ImageView
-                        android:layout_width="24dp"
+                        android:layout_width="16dp"
                         android:layout_height="24dp"
                         android:src="@drawable/in_navi3"
                         android:layout_marginRight="10dp"/>
@@ -200,15 +200,14 @@
             android:layout_height="1dp"
             android:background="#DDDDDD" />
 
-
         <LinearLayout
             android:id="@+id/goStart"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:padding="20dp">
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_marginTop="13dp"
                 android:src="@drawable/logout"
                 android:layout_marginEnd="16dp" />
