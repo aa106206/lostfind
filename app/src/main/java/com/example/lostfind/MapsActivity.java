@@ -107,23 +107,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void loadUserInfo() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            // 로그인 되어있지 않은 경우 처리 (예: 로그인 화면으로 이동)
-            // 이 예제에서는 간단히 리턴합니다.
+            // 로그인 되어있지 않은 경우 처리
+            if (naviBinding != null) {
+                naviBinding.userName.setText("로그인 필요");
+                naviBinding.userEmail.setText("로그인 정보가 없습니다.");
+            }
             return;
         }
 
-        String uid = user.getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
-        ref.get().addOnSuccessListener(snapshot -> {
-            if (snapshot.exists()) {
-                String name = snapshot.child("name").getValue(String.class);
-                String email = snapshot.child("email").getValue(String.class);
+        // 중요: 서버로부터 최신 사용자 정보를 강제로 새로고침합니다.
+        // 이메일 인증 상태나 변경된 이메일 주소를 반영하기 위해 필수적입니다.
+        user.reload().addOnCompleteListener(reloadTask -> {
+            if (reloadTask.isSuccessful()) {
+                // reload에 성공하면, mAuth 인스턴스는 최신 사용자 정보를 담게 됩니다.
+                FirebaseUser freshUser = FirebaseAuth.getInstance().getCurrentUser();
+                if (freshUser != null) {
+                    // DB에서 이름을 가져오는 로직은 그대로 유지
+                    String uid = freshUser.getUid();
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
+                    ref.get().addOnSuccessListener(snapshot -> {
+                        if (snapshot.exists()) {
+                            String name = snapshot.child("name").getValue(String.class);
+                            // naviBinding이 null이 아닐 때만 UI 업데이트
+                            if (naviBinding != null) {
+                                naviBinding.userName.setText(name);
+                            }
+                        }
+                    });
 
-                // naviBinding이 null이 아닐 때만 UI 업데이트
-                if (naviBinding != null) {
-                    naviBinding.userName.setText(name);
-                    naviBinding.userEmail.setText(email);
+                    // 최신 이메일 정보를 화면에 표시
+                    if (naviBinding != null) {
+                        naviBinding.userEmail.setText(freshUser.getEmail());
+                    }
                 }
+            } else {
+                // reload 실패 (예: 네트워크 문제, 사용자 세션 만료 등)
+                Log.e("MapsActivity", "사용자 정보 reload 실패", reloadTask.getException());
+                // 실패 시 기존 정보라도 표시하거나, 에러 메시지를 표시할 수 있습니다.
             }
         });
     }

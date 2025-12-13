@@ -1,28 +1,31 @@
 package com.example.lostfind;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Toast;
-import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.lostfind.databinding.NameChangeBinding; // NameChangeBinding 사용 확인
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
-import com.example.lostfind.databinding.NameChangeBinding;
+import com.google.firebase.database.ValueEventListener;
 
 public class UserNameActivity extends AppCompatActivity {
     private NameChangeBinding binding;
     private DatabaseReference mDatabase;
     private FirebaseUser currentUser;
+    private String currentName; // 현재 이름을 저장할 멤버 변수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,73 +35,89 @@ public class UserNameActivity extends AppCompatActivity {
         binding = NameChangeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        Intent intent = getIntent();
-        // 2. Intent에서 "currentName" 키로 저장된 현재 이름을 꺼냄
-        String currentName = intent.getStringExtra("currentName");
-
-        // 3. 이름이 정상적으로 전달되었다면 TextView에 텍스트 설정
-        if (currentName != null && !currentName.isEmpty()) {
-            binding.name.setText("현재 이름 : " + currentName);
-        } else {
-            binding.name.setText("현재 이름 : (알 수 없음)");
-        }
-
-        mDatabase = FirebaseDatabase.getInstance().getReference();
-        currentUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+        // 시스템 바 UI 처리
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main, (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        binding.btnSaveName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String newName = binding.editNewName.getText().toString().trim();
+        // Firebase 인스턴스 초기화
+        mDatabase = FirebaseDatabase.getInstance().getReference();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-                if (newName.isEmpty()) {
-                    binding.editNewName.setError("이름을 입력해주세요.");
-                    return;
-                }
+        if (currentUser == null) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-                // 현재 이름과 동일한 경우
-                if (newName.equals(currentName)) {
-                    Toast.makeText(UserNameActivity.this, "현재 이름과 동일합니다.", Toast.LENGTH_SHORT).show();
-                    return;
-                }
+        // --- 핵심 수정 사항: DB에서 직접 현재 이름을 불러오기 ---
+        loadAndDisplayCurrentName();
 
+        // 저장 버튼 클릭 리스너
+        binding.btnSaveName.setOnClickListener(view -> {
+            String newName = binding.editNewName.getText().toString().trim();
 
-                if (currentUser != null) {
-                    // Firebase Realtime Database의 "users" -> "UID" -> "name" 경로의 값을 업데이트
-                    mDatabase.child("users").child(currentUser.getUid()).child("name").setValue(newName)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(UserNameActivity.this, "이름이 성공적으로 변경되었습니다.", Toast.LENGTH_SHORT).show();
-
-                                    // --- 결과 전달을 위한 코드 ---
-                                    // 1. 결과를 담을 Intent 생성
-                                    Intent resultIntent = new Intent();
-                                    // 2. "newName"이라는 키로 수정된 이름을 Intent에 담기
-                                    resultIntent.putExtra("newName", newName);
-                                    // 3. 결과 코드와 데이터를 담은 Intent를 설정
-                                    setResult(RESULT_OK, resultIntent);
-                                    // 4. 현재 액티비티 종료
-                                    finish();
-
-                                } else {
-                                    Toast.makeText(UserNameActivity.this, "이름 변경에 실패했습니다.", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                }
+            if (newName.isEmpty()) {
+                binding.editNewName.setError("이름을 입력해주세요.");
+                return;
             }
+
+            // 현재 이름과 동일한 경우 (멤버 변수와 비교)
+            if (newName.equals(currentName)) {
+                Toast.makeText(UserNameActivity.this, "현재 이름과 동일합니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Firebase DB의 이름 업데이트
+            updateNameToDatabase(newName);
         });
 
-        binding.btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        // 뒤로가기 버튼 클릭 리스너
+        binding.btnBack.setOnClickListener(view -> finish());
+    }
+
+    /**
+     * Firebase DB에서 현재 사용자 이름을 가져와 화면에 표시하는 메소드
+     */
+    private void loadAndDisplayCurrentName() {
+        binding.name.setText("현재 이름 : 로딩 중..."); // 사용자에게 로딩 중임을 알림
+        mDatabase.child("users").child(currentUser.getUid()).child("name")
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        if (snapshot.exists()) {
+                            currentName = snapshot.getValue(String.class); // 멤버 변수에 저장
+                            binding.name.setText("현재 이름 : " + currentName);
+                        } else {
+                            binding.name.setText("현재 이름 : (정보 없음)");
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+                        binding.name.setText("현재 이름 : (로딩 실패)");
+                        Toast.makeText(UserNameActivity.this, "이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    /**
+     * 새로운 이름을 Firebase DB에 저장하는 메소드
+     * @param newName 새로 변경할 이름
+     */
+    private void updateNameToDatabase(String newName) {
+        mDatabase.child("users").child(currentUser.getUid()).child("name").setValue(newName)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(UserNameActivity.this, "이름이 성공적으로 변경되었습니다.", Toast.LENGTH_SHORT).show();
+                        // InfoActivity의 onResume()에서 최신 정보를 로드하므로
+                        // 별도의 결과 전달 없이 액티비티를 종료합니다.
+                        finish();
+                    } else {
+                        Toast.makeText(UserNameActivity.this, "이름 변경에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
