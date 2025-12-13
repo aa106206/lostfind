@@ -22,6 +22,7 @@ public class UserEmailActivity extends AppCompatActivity {
     private ActivityUserEmailBinding binding; // XML 파일 이름이 activity_user_email.xml 이라고 가정
     private FirebaseAuth mAuth;
     private DatabaseReference mDatabase;
+    private String currentEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,13 +32,23 @@ public class UserEmailActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        FirebaseUser user = mAuth.getCurrentUser();
 
         // InfoActivity로부터 현재 이메일 주소를 받아옴
-        String currentEmail = getIntent().getStringExtra("currentUserEmail");
-        if (currentEmail == null) {
-            Toast.makeText(this, "사용자 정보를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
+        if (user == null) {
+            Toast.makeText(this, "로그인 정보가 없습니다.", Toast.LENGTH_SHORT).show();
             finish();
             return;
+        }
+
+        // 1. 현재 이메일을 멤버 변수에 저장
+        currentEmail = user.getEmail();
+
+        // 2. 현재 이메일을 화면의 TextView에 표시 (ID를 currentEmailTextView로 가정)
+        if (currentEmail != null && !currentEmail.isEmpty()) {
+            binding.currentEmailTextView.setText("현재 메일 주소 : " + currentEmail);
+        } else {
+            binding.currentEmailTextView.setText("메일 정보가 없습니다.");
         }
 
         // 저장 버튼 클릭 이벤트
@@ -54,9 +65,11 @@ public class UserEmailActivity extends AppCompatActivity {
                 binding.editNewName.setError("올바른 이메일 형식을 입력해주세요.");
                 return;
             }
+            if (currentEmail == null) { // 멤버 변수 null 체크
+                Toast.makeText(this, "현재 이메일 정보가 없어 변경할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            FirebaseUser user = mAuth.getCurrentUser();
-            if (user == null) return;
 
             // --- 재인증 및 이메일 변경 로직 ---
             // 1. 재인증을 위한 자격 증명(Credential) 생성 (현재 이메일 + 입력받은 비밀번호)
