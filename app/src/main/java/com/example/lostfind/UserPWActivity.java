@@ -5,7 +5,7 @@ import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.lostfind.databinding.ActivityUserPwBinding; // XML 파일 이름에 맞게 수정 (예: activity_user_pw.xml)
+import com.example.lostfind.databinding.ActivityUserPwBinding;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -15,6 +15,7 @@ public class UserPWActivity extends AppCompatActivity {
 
     private ActivityUserPwBinding binding;
     private FirebaseAuth mAuth;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,15 +24,19 @@ public class UserPWActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
-        FirebaseUser user = mAuth.getCurrentUser();
+        currentUser = mAuth.getCurrentUser();
 
-        // InfoActivity에서 전달받은 현재 사용자의 이메일
-        String currentUserEmail = getIntent().getStringExtra("currentUserEmail");
+        // 1. 현재 로그인된 사용자가 있는지 먼저 확인
+        if (currentUser == null) {
+            Toast.makeText(this, "로그인 정보가 없습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
-        binding.btnSaveName.setOnClickListener(v -> { // 저장 버튼 ID가 'saveButton'이라고 가정
-            String currentPassword = binding.currentPasswordEditText.getText().toString(); // 현재 비밀번호 EditText
-            String newPassword = binding.newPasswordEditText.getText().toString();       // 새 비밀번호 EditText
-            String confirmPassword = binding.confirmPasswordEditText.getText().toString(); // 새 비밀번호 확인 EditText
+        binding.btnSaveName.setOnClickListener(v -> {
+            String currentPassword = binding.currentPasswordEditText.getText().toString();
+            String newPassword = binding.newPasswordEditText.getText().toString();
+            String confirmPassword = binding.confirmPasswordEditText.getText().toString();
 
             // 입력 값 검증
             if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
@@ -46,26 +51,28 @@ public class UserPWActivity extends AppCompatActivity {
                 Toast.makeText(this, "새 비밀번호가 일치하지 않습니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (user == null || currentUserEmail == null) {
-                Toast.makeText(this, "사용자 정보가 올바르지 않습니다. 다시 로그인해주세요.", Toast.LENGTH_SHORT).show();
+
+            // --- 핵심 수정 사항: FirebaseUser 객체에서 직접 이메일 가져오기 ---
+            String userEmail = currentUser.getEmail();
+            if (userEmail == null) {
+                Toast.makeText(this, "사용자 이메일 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             // --- Firebase 비밀번호 변경 핵심 로직 ---
-            // 1. 재인증을 위한 자격 증명(Credential) 생성 (현재 이메일 + 현재 비밀번호)
-            AuthCredential credential = EmailAuthProvider.getCredential(currentUserEmail, currentPassword);
+            // 1. 재인증을 위한 자격 증명(Credential) 생성 (가져온 이메일 + 현재 비밀번호)
+            AuthCredential credential = EmailAuthProvider.getCredential(userEmail, currentPassword);
 
             // 2. 사용자 재인증
-            user.reauthenticate(credential)
+            currentUser.reauthenticate(credential)
                     .addOnCompleteListener(reauthTask -> {
                         if (reauthTask.isSuccessful()) {
                             // 3. 재인증 성공 시, 새 비밀번호로 업데이트
-                            user.updatePassword(newPassword)
+                            currentUser.updatePassword(newPassword)
                                     .addOnCompleteListener(updateTask -> {
                                         if (updateTask.isSuccessful()) {
                                             Toast.makeText(UserPWActivity.this, "비밀번호가 성공적으로 변경되었습니다.", Toast.LENGTH_SHORT).show();
-                                            setResult(RESULT_OK); // 성공했다는 결과만 전달
-                                            finish();
+                                            finish(); // 성공 시 액티비티 종료
                                         } else {
                                             Toast.makeText(UserPWActivity.this, "비밀번호 변경 실패: " + updateTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                         }
@@ -77,11 +84,6 @@ public class UserPWActivity extends AppCompatActivity {
                     });
         });
 
-        binding.btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                finish();
-            }
-        });
+        binding.btnBack.setOnClickListener(view -> finish());
     }
 }
