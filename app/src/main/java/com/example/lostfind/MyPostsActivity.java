@@ -1,6 +1,7 @@
 package com.example.lostfind;
 
 import android.os.Bundle;
+import android.widget.ImageButton;
 import android.widget.Button;
 import android.widget.Toast; // Toast를 위해 추가
 
@@ -45,7 +46,7 @@ public class MyPostsActivity extends AppCompatActivity {
         }
         currentUserId = currentUser.getUid();
 
-        Button backButton = findViewById(R.id.back_button);
+        ImageButton backButton = findViewById(R.id.back_button);
 
         backButton.setOnClickListener(v -> {
             onBackPressed();
