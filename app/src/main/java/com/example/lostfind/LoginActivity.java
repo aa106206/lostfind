@@ -35,8 +35,7 @@ public class LoginActivity extends AppCompatActivity {
 
         binding.btnLogin.setOnClickListener(v -> login());
         binding.backButton.setOnClickListener(v -> {
-            Intent intent=new Intent(this,StartActivity.class);
-            startActivity(intent);
+            finish();
         });
     }
 
@@ -48,33 +47,28 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, (Task<AuthResult> task) -> {
+                .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         // 로그인 성공
-
-                        //FCM을 위해 FCM 토큰 추출
-                        FirebaseMessaging.getInstance().getToken()
-                                .addOnSuccessListener(token -> {
-                                    String uid = FirebaseAuth.getInstance().getUid();
-                                    FirebaseDatabase.getInstance().getReference("users")
-                                            .child(uid)
-                                            .child("fcmToken")
-                                            .setValue(token);
-                                });
-
-
-                        Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show();
-
-                        // MapsActivity 이동
-                        Intent intent = new Intent(this, MapsActivity.class);
-                        startActivity(intent);
-                        finish();
-
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null) {
+                            // <<< 중요: 이메일 인증 여부 확인 >>>
+                            if (firebaseUser.isEmailVerified()) {
+                                // 이메일 인증 완료됨 -> 메인 화면으로 이동
+                                Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show();
+                                Intent intent = new Intent(this, MapsActivity.class); // 메인 액티비티로 이동
+                                startActivity(intent);
+                                finish();
+                            } else {
+                                // 이메일 인증이 완료되지 않음
+                                Toast.makeText(this, "이메일 인증을 완료해주세요.", Toast.LENGTH_LONG).show();
+                                // 필요하다면 인증 메일 재전송 버튼 제공
+                                // mAuth.signOut(); // 로그아웃 처리
+                            }
+                        }
                     } else {
                         // 로그인 실패
-                        Toast.makeText(this, "로그인 실패: " + task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
-                        Log.e("LOGIN", "LOGIN FAILED", task.getException());
+                        Toast.makeText(this, "로그인 실패: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 

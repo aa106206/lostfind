@@ -14,6 +14,7 @@ import com.example.lostfind.databinding.ActivitySignupBinding;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class SignupActivity extends AppCompatActivity {
@@ -30,8 +31,7 @@ public class SignupActivity extends AppCompatActivity {
         binding.signupButton.setOnClickListener(v -> signup());
 
         binding.backButton.setOnClickListener(v -> {
-            Intent intent=new Intent(this,StartActivity.class);
-            startActivity(intent);
+            finish();
         });
     }
 
@@ -57,35 +57,45 @@ public class SignupActivity extends AppCompatActivity {
             return;
         }
 
+        // --- 회원가입 로직 (수정된 부분) ---
         mAuth.createUserWithEmailAndPassword(email, password1)
                 .addOnCompleteListener(this, (Task<AuthResult> task) -> {
-
                     if (task.isSuccessful()) {
+                        // 1. 계정 생성 성공
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser == null) {
+                            Toast.makeText(this, "사용자 정보를 가져오는데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
 
+                        // 2. 인증 이메일 발송
+                        firebaseUser.sendEmailVerification()
+                                .addOnCompleteListener(emailTask -> {
+                                    if (emailTask.isSuccessful()) {
+                                        // 3. 이메일 발송 성공 시 DB에 사용자 정보 저장
+                                        String uid = firebaseUser.getUid();
+                                        User user = new User(uid, name, email);
 
-                        String uid = mAuth.getCurrentUser().getUid();
-
-                        User user = new User(uid, name, email);
-
-                        FirebaseDatabase.getInstance().getReference("users")
-                                .child(uid)
-                                .setValue(user)
-                                .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
-
-                                    // ④ 회원가입 후 이동
-                                    startActivity(new Intent(this, StartActivity.class));
-                                    finish();
-                                })
-                                .addOnFailureListener(e ->
-                                        Toast.makeText(this, "회원 DB 저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show()
-                                );
-
+                                        FirebaseDatabase.getInstance().getReference("users")
+                                                .child(uid)
+                                                .setValue(user)
+                                                .addOnSuccessListener(aVoid -> {
+                                                    // 4. 사용자에게 안내 후 시작 화면으로 이동
+                                                    Toast.makeText(this, "회원가입 성공! 인증 메일을 확인해주세요.", Toast.LENGTH_LONG).show();
+                                                    startActivity(new Intent(this, StartActivity.class));
+                                                    finish();
+                                                })
+                                                .addOnFailureListener(e ->
+                                                        Toast.makeText(this, "회원 DB 저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show()
+                                                );
+                                    } else {
+                                        // 이메일 발송 실패
+                                        Toast.makeText(this, "인증 메일 발송에 실패했습니다.", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                     } else {
-                        // 회원가입 실패
-                        Toast.makeText(this, "회원가입 실패: " +
-                                        task.getException().getMessage(),
-                                Toast.LENGTH_SHORT).show();
+                        // 계정 생성 실패
+                        Toast.makeText(this, "회원가입 실패: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 

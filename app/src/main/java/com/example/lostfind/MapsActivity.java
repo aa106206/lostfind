@@ -34,6 +34,8 @@ import java.util.List;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private NavigationBinding naviBinding;
+
 
     private DatabaseReference postsRef;
     private ValueEventListener postsListener;
@@ -46,18 +48,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ActivityMapsBinding mapBinding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(mapBinding.getRoot());
 
-        NavigationBinding naviBinding = NavigationBinding.bind(findViewById(R.id.nav_view));
-
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = user.getUid();
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
-        ref.get().addOnSuccessListener(snapshot -> {
-            String name = snapshot.child("name").getValue(String.class);
-            String email = snapshot.child("email").getValue(String.class);
-            naviBinding.userName.setText(name);
-            naviBinding.userEmail.setText(email);
-        });
-
+        naviBinding = NavigationBinding.bind(findViewById(R.id.nav_view));
+        loadUserInfo();
 
         DrawerLayout drawerLayout = mapBinding.drawerLayout;
         mapBinding.naviBtn.setOnClickListener(v -> {
@@ -104,6 +96,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+    protected void onResume() {
+        super.onResume();
+        // 다른 화면에 갔다가 이 화면으로 돌아올 때마다 사용자 정보를 새로고침합니다.
+        loadUserInfo();
+    }
+
+    // --- 추가: 사용자 정보를 불러오는 메소드 ---
+    private void loadUserInfo() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            // 로그인 되어있지 않은 경우 처리 (예: 로그인 화면으로 이동)
+            // 이 예제에서는 간단히 리턴합니다.
+            return;
+        }
+
+        String uid = user.getUid();
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
+        ref.get().addOnSuccessListener(snapshot -> {
+            if (snapshot.exists()) {
+                String name = snapshot.child("name").getValue(String.class);
+                String email = snapshot.child("email").getValue(String.class);
+
+                // naviBinding이 null이 아닐 때만 UI 업데이트
+                if (naviBinding != null) {
+                    naviBinding.userName.setText(name);
+                    naviBinding.userEmail.setText(email);
+                }
+            }
+        });
+    }
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
