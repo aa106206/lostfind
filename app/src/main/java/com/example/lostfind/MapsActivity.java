@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 
+import com.bumptech.glide.Glide;
 import com.example.lostfind.databinding.NavigationBinding;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -109,15 +110,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected void onResume() {
         super.onResume();
-        // 다른 화면에 갔다가 이 화면으로 돌아올 때마다 사용자 정보를 새로고침합니다.
         loadUserInfo();
     }
 
-    // --- 추가: 사용자 정보를 불러오는 메소드 ---
     private void loadUserInfo() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            // 로그인 되어있지 않은 경우 처리
             if (naviBinding != null) {
                 naviBinding.userName.setText("로그인 필요");
                 naviBinding.userEmail.setText("로그인 정보가 없습니다.");
@@ -125,35 +123,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
 
-        // 중요: 서버로부터 최신 사용자 정보를 강제로 새로고침합니다.
-        // 이메일 인증 상태나 변경된 이메일 주소를 반영하기 위해 필수적입니다.
         user.reload().addOnCompleteListener(reloadTask -> {
             if (reloadTask.isSuccessful()) {
-                // reload에 성공하면, mAuth 인스턴스는 최신 사용자 정보를 담게 됩니다.
                 FirebaseUser freshUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (freshUser != null) {
-                    // DB에서 이름을 가져오는 로직은 그대로 유지
                     String uid = freshUser.getUid();
                     DatabaseReference ref = FirebaseDatabase.getInstance().getReference("users").child(uid);
                     ref.get().addOnSuccessListener(snapshot -> {
                         if (snapshot.exists()) {
                             String name = snapshot.child("name").getValue(String.class);
-                            // naviBinding이 null이 아닐 때만 UI 업데이트
+
                             if (naviBinding != null) {
                                 naviBinding.userName.setText(name);
                             }
                         }
                     });
 
-                    // 최신 이메일 정보를 화면에 표시
                     if (naviBinding != null) {
                         naviBinding.userEmail.setText(freshUser.getEmail());
                     }
                 }
             } else {
-                // reload 실패 (예: 네트워크 문제, 사용자 세션 만료 등)
                 Log.e("MapsActivity", "사용자 정보 reload 실패", reloadTask.getException());
-                // 실패 시 기존 정보라도 표시하거나, 에러 메시지를 표시할 수 있습니다.
             }
         });
     }
@@ -161,14 +152,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng soongsil = new LatLng(37.494618, 126.959667);
+//        LatLng soongsil = new LatLng(37.494618, 126.959667);
         LatLng studentHall = new LatLng(37.496845, 126.956781);
         LatLng library = new LatLng(37.496306, 126.958539);
 
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(library, 17));
 
-//        mMap.addMarker(new MarkerOptions().position(soongsil).title("분실물보관소[정보과학관]"));
         mMap.addMarker(new MarkerOptions()
                 .position(studentHall).
                 title("분실물보관소[학생회관406호]")
@@ -178,11 +167,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .title("분실문보관소[도서관1층]")
                 .icon(createCircleMarker(R.drawable.library, 40)));
 
-        //습득 게시물 마커 표시
         loadFoundPostsAndShowMarkers();
 
-
-        //popup을 위해서 마커에 클릭리스너 달기
         mMap.setOnMarkerClickListener(marker -> {
             Object tag = marker.getTag();
 
@@ -192,30 +178,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String postId = snap.getKey();
                 if (postId == null) {
                     Log.e("MapsActivity", "Post ID가 null입니다.");
-                    return true; // postId가 없으면 더 이상 진행하지 않음
+                    return true;
                 }
 
-                // 2. 나머지 데이터들을 올바른 타입으로 가져옵니다.
+
                 String authorId = snap.child("authorId").getValue(String.class);
                 String itemName = snap.child("itemName").getValue(String.class);
                 String imageUrl = snap.child("imageUrl").getValue(String.class);
 
-                // 3. 날짜(date)는 Long 타입으로 가져와서 String으로 변환합니다.
+
                 Object dateValue = snap.child("date").getValue();
                 String dateString = ""; // 기본값은 빈 문자열
                 if (dateValue instanceof Long) {
-                    // SimpleDateFormat을 사용하여 원하는 형식의 문자열로 변환
+
                     java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy.MM.dd", java.util.Locale.KOREA);
                     dateString = sdf.format(new java.util.Date((Long) dateValue));
                 }
 
-                // 4. 생성자에 올바른 데이터를 전달합니다.
                 PopupBottomSheet sheet = new PopupBottomSheet(postId, authorId, itemName, dateString, imageUrl);
                 sheet.show(getSupportFragmentManager(), sheet.getTag());
 
+                return true;
             }
 
-            return true; // 기본 동작(카메라 이동) 막기
+            return false;
         });
 
 
@@ -228,21 +214,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                // 1) 기존 습득물 마커 지우기
+
                 for (Marker m : foundMarkers) {
                     m.remove();
                 }
                 foundMarkers.clear();
 
-                // 2) 새 데이터로 마커 다시 그리기
+
                 for (DataSnapshot postSnap : snapshot.getChildren()) {
 
-                    // type이 isfound인 게시물만 지도에 표시
+
                     String type = postSnap.child("type").getValue(String.class);
                     if (type == null || !type.equals("isfound")) continue;
 
                     String title = postSnap.child("itemName").getValue(String.class);
-//                    String date = postSnap.child("date").getValue(String.class);
+
                     Long date = snapshot.child("date").getValue(Long.class);
 
                     String imageUrl = postSnap.child("imageUrl").getValue(String.class);
@@ -263,17 +249,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         LatLng foundLoc = new LatLng(lat, lng);
 
-                        Marker marker = mMap.addMarker(
-                                new MarkerOptions()
-                                        .position(foundLoc)
-                                        .title(title)
+                        addFoundItemMarker(
+                                foundLoc,
+                                title,
+                                imageUrl,
+                                postSnap
                         );
 
-                        // BottomSheet에서 쓰려고 tag로 postSnap 저장
-                        marker.setTag(postSnap);
-
-                        // 나중에 지우기 위해 리스트에 보관
-                        foundMarkers.add(marker);
 
                         Log.d("Maps", "분실물 위치 표시 완료: " + lat + ", " + lng);
 
@@ -311,22 +293,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int sizePx = (int) (sizeDp * density);
         float radius = sizePx / 2f;
 
-        // 1️⃣ Drawable → Bitmap
+
         Bitmap srcBitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
         Canvas srcCanvas = new Canvas(srcBitmap);
         drawable.setBounds(0, 0, sizePx, sizePx);
         drawable.draw(srcCanvas);
 
-        // 2️⃣ 원형 Bitmap
+
         Bitmap output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
 
-        // 🔹 이미지 원형 채우기
+
         Paint imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         imagePaint.setShader(new BitmapShader(srcBitmap, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
         canvas.drawCircle(radius, radius, radius, imagePaint);
 
-        // 🔹 흰색 테두리
+
         Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
         strokePaint.setColor(Color.BLACK);
@@ -336,6 +318,76 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return BitmapDescriptorFactory.fromBitmap(output);
     }
 
+    private void addFoundItemMarker(
+            LatLng position,
+            String title,
+            String imageUrl,
+            DataSnapshot postSnap
+    ) {
+        int sizeDp = 36;
+        int borderColor = Color.BLUE;
+
+        Glide.with(this)
+                .asBitmap()
+                .load(imageUrl)
+                .into(new com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
+
+                    @Override
+                    public void onResourceReady(
+                            @NonNull Bitmap resource,
+                            com.bumptech.glide.request.transition.Transition<? super Bitmap> transition
+                    ) {
+
+                        BitmapDescriptor icon =
+                                createCircleMarkerFromBitmap(resource, sizeDp, borderColor);
+
+                        Marker marker = mMap.addMarker(
+                                new MarkerOptions()
+                                        .position(position)
+                                        .title(title)
+                                        .icon(icon)
+                        );
+
+                        if (marker != null) {
+                            marker.setTag(postSnap);
+                            foundMarkers.add(marker);
+                        }
+                    }
+
+                    @Override
+                    public void onLoadCleared(Drawable placeholder) {}
+                });
+    }
+
+
+    private BitmapDescriptor createCircleMarkerFromBitmap(
+            Bitmap src,
+            int sizeDp,
+            int borderColor
+    ) {
+        float density = getResources().getDisplayMetrics().density;
+        int sizePx = (int) (sizeDp * density);
+        float radius = sizePx / 2f;
+
+        Bitmap scaled = Bitmap.createScaledBitmap(src, sizePx, sizePx, true);
+
+        Bitmap output = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        Paint imagePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        imagePaint.setShader(
+                new BitmapShader(scaled, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP)
+        );
+        canvas.drawCircle(radius, radius, radius, imagePaint);
+
+        Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        strokePaint.setStyle(Paint.Style.STROKE);
+        strokePaint.setColor(borderColor);
+        strokePaint.setStrokeWidth(4f);
+        canvas.drawCircle(radius, radius, radius - 2f, strokePaint);
+
+        return BitmapDescriptorFactory.fromBitmap(output);
+    }
 
 
 
