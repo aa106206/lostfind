@@ -366,9 +366,11 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
         if (isEditMode) {
             // 수정 모드: 기존 postId 사용
             postId = editPostId;
+            Log.d("Gemini", "수정하고 있어요1");
         } else {
             // 새 글 작성 모드: 새로운 postId 생성
             postId = databaseReference.push().getKey();
+            Log.d("Gemini", "수정하고 있어요2");
         }
         if (postId == null) {
             Toast.makeText(this, "오류: 게시물 ID를 생성할 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -390,6 +392,7 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
                     // ★★★ Gemini 분석 및 매칭 로직을 조건부로 실행 ★★★
                     // 새 글이면서, 습득물이면서, 이미지가 있을 때만 AI 분석 실행
                     if (!isEditMode && isFound && imageUri != null) {
+                        Log.d("Gemini", "수정하고 있어요3");
                         analyzeFoundPostToGemini(title, itemName, location, description, imageUri, new OnResultListener() {
                             @Override
                             public void onSuccess(String res) {

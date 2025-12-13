@@ -34,6 +34,10 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         binding.btnLogin.setOnClickListener(v -> login());
+        binding.backButton.setOnClickListener(v -> {
+            Intent intent=new Intent(this,StartActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void login() {
