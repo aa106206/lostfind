@@ -49,7 +49,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         if ("islost".equals(post.getType())) {
             // "찾는 글(isLost)"일 경우: 위치 정보 숨김
-            holder.postLocation.setVisibility(View.GONE);
+            holder.postLocation.setVisibility(View.INVISIBLE);
             holder.postLocation.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 
         } else { // "찾은 글(isfound)"일 경우
@@ -73,7 +73,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
         Glide.with(context)
                 .load(post.getImageUrl())
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.drawable.noimage)
                 .into(holder.postImage);
 
         holder.itemView.setOnClickListener(v -> {
