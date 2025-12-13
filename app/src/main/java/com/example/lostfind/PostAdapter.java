@@ -40,7 +40,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
         Post post = postList.get(position);
 
         holder.postTitle.setText(post.getTitle());
-        holder.postLocation.setText(post.getLocation());
+
+        if ("isfound".equals(post.getType())) {
+            // post.type이 "isfound" (찾은 글)이면, 위치 TextView를 숨깁니다.
+            holder.postLocation.setVisibility(View.GONE);
+        } else {
+            // 그 외의 경우 (예: "islost", 찾는 글)이면, 위치 TextView를 보여주고 텍스트를 설정합니다.
+            holder.postLocation.setVisibility(View.VISIBLE);
+            holder.postLocation.setText(post.getLocation());
+        }
 
         if (post.getDate() instanceof Long) {
             long timestamp = (Long) post.getDate();
