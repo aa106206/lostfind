@@ -34,7 +34,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
 //                    .setSmallIcon(R.mipmap.ic_launcher) // 아이콘 없으면 기본 런처 아이콘
-                    .setSmallIcon(R.drawable.login_icon)
+                    .setSmallIcon(R.drawable.glass)
                     .setContentTitle(remoteMessage.getNotification().getTitle())
                     .setContentText(remoteMessage.getNotification().getBody())
                     .setAutoCancel(true);
