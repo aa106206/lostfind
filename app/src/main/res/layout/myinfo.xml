@@ -69,6 +69,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
         android:orientation="vertical"
         android:weightSum="100"
         android:background="@color/one">
@@ -80,9 +82,12 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
+            android:layout_marginBottom="12dp"
+            android:layout_marginTop="16dp"
             android:text="이름 변경"
             android:textSize="20sp"
             android:textStyle="bold"
+
             app:cornerRadius="10dp"
             android:backgroundTint="@color/gray"/>
 
@@ -92,6 +97,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
+            android:layout_marginBottom="12dp"
             android:text="이메일 변경"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -107,6 +113,7 @@
             android:text="비밀번호 변경"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:layout_marginBottom="12dp"
             app:cornerRadius="10dp"
             android:backgroundTint="@color/gray"/>
 
@@ -114,6 +121,7 @@
             android:id="@+id/bookmark_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:layout_marginLeft="15dp"
             android:layout_marginRight="15dp"
             android:text="북마크"

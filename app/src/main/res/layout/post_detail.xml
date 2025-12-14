@@ -68,7 +68,7 @@
                             android:id="@+id/profile_image"
                             android:layout_width="40dp"
                             android:layout_height="40dp"
-                            android:background="@drawable/bg_circle"
+                            android:background="@drawable/default_infoicon"
                             android:padding="8dp"/>
 
                         <TextView
