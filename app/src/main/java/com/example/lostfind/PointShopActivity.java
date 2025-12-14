@@ -60,7 +60,7 @@ public class PointShopActivity extends AppCompatActivity {
 
     private DatabaseReference userRef; // user의 전체 경로 참조
     private ValueEventListener pointValueEventListener;
-    private long currentUserPoint = 0; // 현재 포인트를 저장할 변수
+    private long currentUserPoint = 4900; // 현재 포인트를 저장할 변수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
