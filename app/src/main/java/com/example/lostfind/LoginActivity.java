@@ -52,17 +52,30 @@ public class LoginActivity extends AppCompatActivity {
                         // 로그인 성공
                         FirebaseUser firebaseUser = mAuth.getCurrentUser();
                         if (firebaseUser != null) {
-                            // <<< 중요: 이메일 인증 여부 확인 >>>
                             if (firebaseUser.isEmailVerified()) {
-                                // 이메일 인증 완료됨 -> 메인 화면으로 이동
+                                //  FCM 토큰 저장
+                                FirebaseMessaging.getInstance().getToken()
+                                        .addOnSuccessListener(token -> {
+                                            String uid = FirebaseAuth.getInstance().getUid();
+                                            if (uid != null) {
+                                                FirebaseDatabase.getInstance()
+                                                        .getReference("users")
+                                                        .child(uid)
+                                                        .child("fcmToken")
+                                                        .setValue(token);
+                                            }
+                                        });
+
+                                //
                                 Toast.makeText(this, "로그인 성공!", Toast.LENGTH_SHORT).show();
-                                Intent intent = new Intent(this, MapsActivity.class); // 메인 액티비티로 이동
+                                Intent intent = new Intent(this, MapsActivity.class);
                                 startActivity(intent);
                                 finish();
-                            } else {
+                            }
+                            //여기까지 수정
+                            else {
                                 // 이메일 인증이 완료되지 않음
                                 Toast.makeText(this, "이메일 인증을 완료해주세요.", Toast.LENGTH_LONG).show();
-                                // 필요하다면 인증 메일 재전송 버튼 제공
                                 // mAuth.signOut(); // 로그아웃 처리
                             }
                         }

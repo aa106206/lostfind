@@ -19,7 +19,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Log.d("FCM", "메시지 수신됨: " + remoteMessage.getNotification());
 
-        // ⭐︎⭐︎ 1) 알림 채널 생성 (Android 8 이상 필수) ⭐︎⭐︎
+        //1) 알림 채널 생성 (Android 8 이상 필수)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     "default",              // 채널 ID
@@ -30,10 +30,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
             manager.createNotificationChannel(channel);
         }
 
-        // ⭐︎⭐︎ 2) 실제 알림 표시 ⭐︎⭐︎
+        // 2) 실제 알림 표시
         if (remoteMessage.getNotification() != null) {
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "default")
-                    .setSmallIcon(R.mipmap.ic_launcher) // 아이콘 없으면 기본 런처 아이콘
+//                    .setSmallIcon(R.mipmap.ic_launcher) // 아이콘 없으면 기본 런처 아이콘
+                    .setSmallIcon(R.drawable.glass)
                     .setContentTitle(remoteMessage.getNotification().getTitle())
                     .setContentText(remoteMessage.getNotification().getBody())
                     .setAutoCancel(true);
@@ -49,8 +50,5 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
         Log.d("FCM", "새 FCM 토큰 생성됨: " + token);
 
-        // TODO: 토큰을 Firebase Realtime Database users/{uid}/fcmToken 에 업데이트 해줘야 함
-        // 현재 로그인 로직에 token 저장 기능이 있으므로
-        // 필요하면 여기서도 업데이트 가능
     }
 }
