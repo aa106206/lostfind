@@ -46,6 +46,16 @@
             android:name=".SignupActivity"
             android:exported="false" />
         <activity
+            android:name=".MapsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_maps">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".StartActivity"
             android:exported="true">
             <intent-filter>
@@ -96,11 +106,6 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCyewylig77d8TwQiZ25dfSTpwPkN-wf3c" />
 
-        <activity
-            android:name=".MapsActivity"
-            android:exported="true"
-            android:label="@string/title_activity_maps">
-        </activity>
         <activity
             android:name=".MyPostsActivity"
             android:exported="true" />
