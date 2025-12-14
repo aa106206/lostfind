@@ -311,7 +311,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         Paint strokePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         strokePaint.setStyle(Paint.Style.STROKE);
-        strokePaint.setColor(Color.BLACK);
+        strokePaint.setColor(Color.RED);
         strokePaint.setStrokeWidth(4f);
         canvas.drawCircle(radius, radius, radius - 2f, strokePaint);
 

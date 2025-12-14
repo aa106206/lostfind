@@ -407,8 +407,6 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
                     // ★★★ Gemini 분석 및 매칭 로직 (조건부) ★★★
                     if (!isEditMode && isFound && imageUri != null) {
 
-                        Log.d("Gemini", "수정하고 있어요3 (Gemini 분석 시작)");
-
                         analyzeFoundPostToGemini(
                                 title,
                                 itemName,
@@ -419,7 +417,6 @@ public class PostWriteActivity extends AppCompatActivity implements OnMapReadyCa
 
                                     @Override
                                     public void onSuccess(String res) {
-                                        Log.d("Gemini", "수정하고 있어요4 (Gemini 성공)");
 
                                         try {
                                             JSONObject json = extractGeminiJsonOnly(res);
