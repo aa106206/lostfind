@@ -132,7 +132,7 @@ public class BookmarkActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // 액티비티가 종료될 때 리스너를 제거하여 메모리 누수 방지
+        // 액티비티가 종료될 때 리스너를 제거
         if (bookmarkRef != null && bookmarkListener != null) {
             bookmarkRef.removeEventListener(bookmarkListener);
         }

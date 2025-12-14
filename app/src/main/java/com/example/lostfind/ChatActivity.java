@@ -57,7 +57,7 @@ public class ChatActivity extends AppCompatActivity {
             return insets;
         });
 
-        // --- Intent로부터 데이터 받기 ---
+
         chatRoomId = getIntent().getStringExtra("chatRoomId");
         opponentUserName = getIntent().getStringExtra("opponentUserName");
 
@@ -71,20 +71,20 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // --- Firebase 사용자 정보 및 DB 경로 설정 ---
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
             Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
-        // 메시지들이 저장된 경로를 참조
+
         chatMessagesRef = FirebaseDatabase.getInstance().getReference("chat_messages").child(chatRoomId);
 
-        // --- UI 초기화 ---
+
         initializeViews();
 
-        // --- 내 이름 가져오기 및 채팅 시작 ---
+
         fetchMyUserNameAndStartChat();
 
         findViewById(R.id.btn_reward).setOnClickListener(v -> {
@@ -94,7 +94,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        // 액션바(타이틀바)에 상대방 이름 표시
+
         if (getSupportActionBar() != null) {
             getSupportActionBar().setTitle(opponentUserName);
         }
@@ -106,12 +106,12 @@ public class ChatActivity extends AppCompatActivity {
         chatMessages = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        // 전송 버튼 클릭 리스너
+
         fab.setOnClickListener(v -> sendMessage());
     }
 
     private void fetchMyUserNameAndStartChat() {
-        // 내 이름을 'users' DB에서 가져옵니다.
+
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
         usersRef.child(currentUser.getUid()).child("name").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
