@@ -40,7 +40,7 @@
 
 박동준(22학번): UX 구현, Google Maps API, Gemini API 연동 및 FCM 구현, Firebase Authentication
 
-김승렬(22학번): 게시판 CRUD 기능 구현, UI 디자인(Figma), Firebase realtime DB 관리
+김승렬(22학번): 게시판 기능 구현, UI 디자인(Figma), Firebase realtime DB 관리
 
 오현빈(22학번): 실시간 채팅 및 포인트 상점 구현, Firebase realtime DB 관리
 
