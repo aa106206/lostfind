@@ -9,9 +9,8 @@
 1. 지도 기반 분실물 확인: 현재 어떤 분실물이 어디서 발견되었는지 지도상에서 실제 이미지 마커를 통해 한눈에 확인할 수 있습니다.
 
 2. Gemini AI 기반 맞춤형 알림: Gemini API를 활용해 습득물 게시글의 내용을 분석하고, 비슷한 물건을 찾는 사용자에게 자동으로 알림을 전송합니다.
-
-   > [!NOTE]
-   > Gemini API Key값 변경으로 인해, 현재 분실물 매칭기능은 제공되지 않습니다.
+> [!NOTE]
+> Gemini API Key값 변경으로 인해, 현재 분실물 매칭기능은 제공되지 않습니다.
 
 3. 실시간 채팅: 분실물 습득자와 실시간으로 소통하며 이미지 전송 등을 통해 물건을 안전하게 확인할 수 있습니다.
 
@@ -21,7 +20,7 @@
 
 ## 🛠 기술 스택 (Tech Stack)
 
-1. Language & Framework: Android (Java/Kotlin), XML 기반 UI 디자인
+1. Language & Framework: Android Studio (Java), XML 기반 UI 디자인
 
 2. Backend: Firebase (Authentication, Realtime Database, Cloud Storage)
 
@@ -39,7 +38,7 @@
 
 ## 👥 팀원 (Team Members)
 
-박동준(22학번): UX 구현, Google Maps API, Gemini API 연동 및 기능 구현, Firebase Authentication, FCM 기능 구현
+박동준(22학번): UX 구현, Google Maps API, Gemini API 연동 및 FCM 구현, Firebase Authentication
 
 김승렬(22학번): 게시판 CRUD 기능 구현, UI 디자인(Figma), Firebase realtime DB 관리
 
@@ -49,6 +48,6 @@
 
 ## 📺 시연 영상 (Demo Video)
 
-[![찾아Dream 시연 영상](https://img.youtube.com/vi/유튜브_영상_ID/0.jpg)](https://youtu.be/m_PcV5sAyH8?si=hqFFD631C2sIWfx9)
+https://youtu.be/m_PcV5sAyH8?si=hqFFD631C2sIWfx9
 
-> 위 이미지를 클릭하면 YouTube 시연 영상으로 이동합니다.
+> 위 링크를 클릭하면 YouTube 시연 영상으로 이동합니다.
